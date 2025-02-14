@@ -1,5 +1,6 @@
 from token_type import TokenType
 
+
 class Token:
     tokenType: TokenType
     lexeme: str
@@ -13,4 +14,7 @@ class Token:
         self.line = line
 
     def __str__(self):
-        return self.tokenType + " " + self.lexeme + " " + self.literal
+        if self.literal is None:
+            return str(self.tokenType) + " " + self.lexeme
+        else:
+            return str(self.tokenType) + " " + self.lexeme + " " + str(self.literal)
