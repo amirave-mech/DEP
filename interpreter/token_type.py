@@ -4,8 +4,10 @@ class TokenType(Enum):
     # Single-character tokens
     LEFT_PAREN = auto()
     RIGHT_PAREN = auto()
-    LEFT_BRACE = auto()
-    RIGHT_BRACE = auto()
+    LEFT_BRACKET = auto()
+    RIGHT_BRACKET = auto()
+    START_SCOPE = auto()
+    END_SCOPE = auto()
     COMMA = auto()
     DOT = auto()
     MINUS = auto()
@@ -13,11 +15,14 @@ class TokenType(Enum):
     SEMICOLON = auto()
     SLASH = auto()
     STAR = auto()
+    CARET = auto()
+    COMMENT = auto() # "|>"
 
     # One or two character tokens
+    LEFT_ARROW = auto() # "<-"
     BANG = auto()
     BANG_EQUAL = auto()
-    EQUAL = auto()
+    # EQUAL = auto() # UNUSED FOR NOW
     EQUAL_EQUAL = auto()
     GREATER = auto()
     GREATER_EQUAL = auto()
@@ -30,20 +35,17 @@ class TokenType(Enum):
     NUMBER = auto()
 
     # Keywords
-    AND = auto()
-    CLASS = auto()
-    ELSE = auto()
     FALSE = auto()
+    TRUE = auto()
+    AND = auto()
+    OR = auto()
+    ELSE = auto()
     FUN = auto()
     FOR = auto()
     IF = auto()
     NIL = auto()
-    OR = auto()
     PRINT = auto()
     RETURN = auto()
-    SUPER = auto()
-    THIS = auto()
-    TRUE = auto()
     VAR = auto()
     WHILE = auto()
 
