@@ -1,2 +1,9 @@
+for /f "delims=" %%i in ('pip show pyautogui 2^>^&1 ^| findstr WARNING') do set installed=%%i
+if defined installed (
+    py -m pip install pyautogui
+)
 cd dep_web
-npm start
+start /B npm start
+cd ..
+timeout /t 1 >nul
+python open_web.py
