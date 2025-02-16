@@ -1,5 +1,6 @@
 from enum import Enum, auto
 
+
 class TokenType(Enum):
     # Single-character tokens
     LEFT_PAREN = auto()
@@ -16,10 +17,10 @@ class TokenType(Enum):
     SLASH = auto()
     STAR = auto()
     CARET = auto()
-    COMMENT = auto() # "|>"
+    COMMENT = auto()  # "|>"
 
     # One or two character tokens
-    LEFT_ARROW = auto() # "<-"
+    LEFT_ARROW = auto()  # "<-"
     BANG = auto()
     BANG_EQUAL = auto()
     # EQUAL = auto() # UNUSED FOR NOW

@@ -1,5 +1,7 @@
 from token import Token
+
 from token_type import TokenType
+
 
 class Scanner:
     source: str
