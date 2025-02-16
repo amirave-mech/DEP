@@ -5,7 +5,7 @@ function App() {
     let textArea: HTMLInputElement | null = document.getElementById('code') as HTMLInputElement;
     let serverResponse: HTMLElement | null = document.getElementById('serverResponse');
     if (textArea && serverResponse) {
-      fetchData(textArea.value).then(data => serverResponse.textContent = (data.message + data.received) || data.error);
+      fetchData(textArea.value).then(data => serverResponse.innerHTML = (data.message + '\n' + data.received).replace(/\n/g, '<br>') || data.error);
     }
   }
 
@@ -22,7 +22,7 @@ function App() {
 async function fetchData(text: string) {
   try {
     const options: RequestInit = {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(text)};
-    return fetch('http://locaclhost:5000/', options).then(response => response.json());
+    return fetch('http://localhost:5000/', options).then(response => response.json());
   } catch (error) {
     console.error('Error fetching data: ', error);
   }
