@@ -17,10 +17,10 @@ class TokenType(Enum):
     SLASH = auto()
     STAR = auto()
     CARET = auto()
-    COMMENT = auto()  # "|>"
 
     # One or two character tokens
     LEFT_ARROW = auto()  # "<-"
+    COMMENT = auto()  # "|>"
     BANG = auto()
     BANG_EQUAL = auto()
     # EQUAL = auto() # UNUSED FOR NOW
