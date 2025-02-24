@@ -1,7 +1,7 @@
-from Token import Token
-from token_type import TokenType
-import expr
-from expr import Expr
+from src.Token import Token
+from src.token_type import TokenType
+import src.expr as expr
+from src.expr import Expr
 
 # TODO:
 # - Improve error reporting, add concise failure messages (token position, etc..)

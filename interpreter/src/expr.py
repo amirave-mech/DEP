@@ -4,8 +4,8 @@ from dataclasses import dataclass
 
 # from interpreter.token import Token
 # from interpreter.token_type import TokenType
-from Token import Token
-from token_type import TokenType
+from src.Token import Token
+from src.token_type import TokenType
 
 type Expr = Grouping | Binary | Unary | Literal
 
