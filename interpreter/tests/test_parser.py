@@ -1,7 +1,6 @@
-from parser import Parser
-from Token import Token
-from token_type import TokenType
 import expr
+
+from . import Parser, Token, TokenType
 
 toks = [
     Token(TokenType.NUMBER, "5", 5, 1),

@@ -1,5 +1,6 @@
 from src.token_type import TokenType
 
+
 class Token:
     tokenType: TokenType
     lexeme: str
@@ -7,7 +8,14 @@ class Token:
     line: int
     char_range: tuple[int, int]
 
-    def __init__(self, tokenType: TokenType, lexeme: str, literal: object, line: int, char_range: tuple[int, int]):
+    def __init__(
+        self,
+        tokenType: TokenType,
+        lexeme: str,
+        literal: object,
+        line: int,
+        char_range: tuple[int, int],
+    ):
         self.tokenType = tokenType
         self.lexeme = lexeme
         self.literal = literal

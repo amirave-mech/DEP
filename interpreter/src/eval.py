@@ -3,7 +3,6 @@ from src.expr import Expr
 from src.Token import Token
 from src.token_type import TokenType
 
-
 type Literal = str | float | bool
 
 # TODO: Should `Token` hold booleans as literals and not just token types?
