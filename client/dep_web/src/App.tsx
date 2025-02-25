@@ -1,11 +1,19 @@
-import './App.css'
+import React from 'react';
+import './App.css';
+import {CodeModule} from './CodeModule';
+import {OutputModule} from './OutputModule';
 
 function App() {
+  const [codeText, setCodeText] = React.useState("console.log('hello world!');");
+    const onCodeTextChange = React.useCallback((val: React.SetStateAction<string>) => {
+        setCodeText(val);
+    }, []);
+
+  const [output, setOutput] = React.useState("");
+
   const sendCode = () => {
-    let textArea: HTMLInputElement | null = document.getElementById('code') as HTMLInputElement;
-    let serverResponse: HTMLElement | null = document.getElementById('serverResponse');
-    if (textArea && serverResponse) {
-      fetchData(textArea.value).then(data => serverResponse.innerHTML = (data.message + '\n' + data.received).replace(/\n/g, '<br>') || data.error);
+    if (codeText) {
+      fetchData(codeText).then(data => setOutput((data.message + '\n' + data.received) || data.error));
     }
   }
 
@@ -14,13 +22,15 @@ function App() {
       <Header></Header>
       <div className="main-content">
         <div className="left-side">
-          <h1>Enter your text here</h1>
-          <textarea id='code'></textarea><br />
+          {/* <h1>Enter your text here</h1> */}
+          <CodeModule 
+            value={codeText} 
+            onChange={onCodeTextChange}
+          />
         </div>
 
         <div className="right-side">
-          <button onClick={sendCode}>Send Text</button><br />
-          <p id='serverResponse' />
+          <OutputModule sendCode={sendCode} outputText={output}/>
         </div>
       </div>
     </>
