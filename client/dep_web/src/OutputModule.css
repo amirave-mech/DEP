@@ -22,10 +22,9 @@
     height: 100%; */
     flex: 1;
     overflow: auto;
-
-    border-radius: 1em;
-    border: 1px solid gray;
     
     text-align: start;
     padding: 1em;
+
+    background-color: rgba(var(--bg-tonal-a10), 0.5);
 }

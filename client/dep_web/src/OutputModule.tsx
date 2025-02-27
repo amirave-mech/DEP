@@ -8,7 +8,7 @@ export function OutputModule(props: { sendCode: () => void, outputText: string})
                 <button onClick={props.sendCode}>RUNN 🐫🐫🐫🐫</button><br />
                 <button onClick={props.sendCode}>DEBUGGGG</button><br />
             </div>
-            <div className="output-field" style={{ whiteSpace: 'pre-line' }}>
+            <div className="output-field border" style={{ whiteSpace: 'pre-line' }}>
                 {props.outputText}
             </div>
         </div>
