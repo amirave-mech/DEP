@@ -1,6 +1,8 @@
-import expr
+import interpreter.src.expr as expr
 
-from . import Parser, Token, TokenType
+from interpreter.src.parser import Parser
+from interpreter.src.Token import Token
+from interpreter.src.token_type import TokenType
 
 toks = [
     Token(TokenType.NUMBER, "5", 5, 1),

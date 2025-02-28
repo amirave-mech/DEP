@@ -1,5 +1,5 @@
-from Token import Token
-from token_type import TokenType
+from .Token import Token
+from .token_type import TokenType
 
 reserved_keywords = {
     "and": TokenType.AND,
