@@ -9,6 +9,15 @@
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
             "env": {"PYTHONPATH": "${workspaceFolder}"}
+        },
+        {
+            "name": "Python: Cli",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/interpreter/src/cli.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "env": {"PYTHONPATH": "${workspaceFolder}"}
         }
     ]
 }
