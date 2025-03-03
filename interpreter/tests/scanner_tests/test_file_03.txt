@@ -1,0 +1,21 @@
+greet(name)
+    print("Hello,", name)
+
+factorial(n)
+    if n = 0
+        return True
+    else
+        return n * factorial(n - 1)
+
+main()
+    x <- 5
+    y <- 10
+    if x < y
+        print("x is smaller than y")
+    else
+        print("x is greater or equal to y")
+    for i <- 1 to 10
+        print("Factorial of", i, "is", factorial(i))
+
+greet("Alice")
+main()
