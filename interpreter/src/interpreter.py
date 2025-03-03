@@ -1,7 +1,7 @@
-from expr import display
-from eval import Eval, Literal
-from parser import Parser
-from Scanner import Scanner
+from .eval import Eval, Literal
+from .parser import Parser
+from .Scanner import Scanner
+from .expr import Expr
 
 class Journal:
     def __init__(self, value):
@@ -18,4 +18,5 @@ class Interpreter:
         tokens = scanner.scan_tokens()
         parser = Parser(tokens)
         expr_ast_opt = parser.parse()
+        print("The result is: ", Expr.display(expr_ast_opt))
         return Journal(Eval.expression(expr_ast_opt))

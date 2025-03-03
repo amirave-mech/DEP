@@ -1,4 +1,4 @@
-from interpreter import Interpreter, Journal
+from interpreter.src.Interpreter import Interpreter, Journal
 
 
 class CLI:

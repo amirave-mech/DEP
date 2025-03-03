@@ -1,7 +1,7 @@
 import interpreter.src.expr as expr
-from .expr import Expr
-from .Token import Token
-from .token_type import TokenType
+from interpreter.src.expr import Expr
+from interpreter.src.Token import Token
+from interpreter.src.token_type import TokenType
 
 # TODO:
 # - Improve error reporting, add concise failure messages (token position, etc..)
