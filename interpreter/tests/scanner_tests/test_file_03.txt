@@ -1,13 +1,13 @@
-function greet(name)
+greet(name)
     print("Hello,", name)
 
-function factorial(n)
+factorial(n)
     if n = 0
         return True
     else
         return n * factorial(n - 1)
 
-function main()
+main()
     x <- 5
     y <- 10
     if x < y
