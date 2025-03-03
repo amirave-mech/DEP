@@ -1,0 +1,11 @@
+var x = 42
+if x > 10:
+    print("Greater")
+else:
+    print("Smaller")
+
+for i = 0; i < 5; i = i + 1:
+    print("Loop:", i)
+
+fun greet():
+    print("Hello, World!")

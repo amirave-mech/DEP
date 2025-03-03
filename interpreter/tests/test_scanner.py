@@ -1,4 +1,4 @@
-from interpreter.src.Scanner import Scanner
+from src.Scanner import Scanner
 
 source = """!*+-/=<> {var blawg = 123.555.lower()} <= == |> this is a comment ==
 test test the test AND = for"""
