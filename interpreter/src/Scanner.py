@@ -9,12 +9,12 @@ reserved_keywords = {
     "for": TokenType.FOR,
     "while": TokenType.WHILE,
     "print": TokenType.PRINT,
-    "var": TokenType.VAR,
     "return": TokenType.RETURN,
     "true": TokenType.TRUE,
     "false": TokenType.FALSE,
     "nil": TokenType.NIL,
-    "function": TokenType.DEF
+    "to" : TokenType.UPTO,
+    "downto" : TokenType.DOWNTO
 }
 
 class Scanner:
@@ -24,7 +24,6 @@ class Scanner:
     _current: int = 0
     _line: int = 1
     _indent_stack: list[int] = [0]
-    _last_token_was_colon: bool = False
     _func_def: bool = False # is set to True while a function is being defined, set to False when that is done
     
     def __init__(self, source: str):
@@ -32,11 +31,6 @@ class Scanner:
         self._tokens = []
 
     def scan_tokens(self) -> list[Token]:
-        # for i in range(10):
-        #     new_var = self.extract_word()
-        #     print(len(new_var))
-        #     print(new_var)
-        # print("hi")
         while not self.is_at_end():
             self.advance_start()
             self.scan_token()
@@ -60,12 +54,15 @@ class Scanner:
             case ";": self.add_token(TokenType.SEMICOLON)
             case "*": self.add_token(TokenType.STAR)
             case "^": self.add_token(TokenType.CARET)
-            case ":":
-                self.add_token(TokenType.COLON)
-                self._last_token_was_colon = True
             case "!": self.add_token(TokenType.BANG_EQUAL if self.match_and_advance("=") else TokenType.BANG)
-            case "=": self.add_token(TokenType.EQUAL_EQUAL if self.match_and_advance("=") else TokenType.EQUAL_EQUAL)
-            case "<": self.add_token(TokenType.LESS_EQUAL if self.match_and_advance("=") else TokenType.LESS)
+            case "=": self.add_token(TokenType.EQUAL_EQUAL)
+            case "<":
+                if self.match_and_advance("="):
+                    self.add_token(TokenType.LESS_EQUAL)
+                elif self.match_and_advance("-"):
+                    self.add_token(TokenType.LEFT_ARROW)
+                else:
+                    self.add_token(TokenType.LESS)
             case ">": self.add_token(TokenType.GREATER_EQUAL if self.match_and_advance("=") else TokenType.GREATER)
             case "|":
                 if self.match_and_advance(">"):
@@ -84,7 +81,7 @@ class Scanner:
                 if c.isdigit():
                     self.number()
                 elif c.isalpha():
-                    self.handle_identifier()
+                    self.identifier()
                 else:
                     self.error(f"Unexpected character '{c}'")
 
@@ -95,18 +92,12 @@ class Scanner:
             count += 1
 
         if count > self._indent_stack[-1]:
-            if not self._last_token_was_colon:
-                self.error(f"Error: Indentation without preceding colon")
             self._indent_stack.append(count)
             self.add_token(TokenType.START_SCOPE)
         elif count < self._indent_stack[-1]:
             while count < self._indent_stack[-1]:
                 self._indent_stack.pop()
                 self.add_token(TokenType.END_SCOPE)
-        elif self._last_token_was_colon:
-            self.error(f"Error: Expected indentation after colon")
-        
-        self._last_token_was_colon = False  # Reset only after checking indentation
 
     def advance(self) -> str:
         if self.is_at_end():
@@ -159,57 +150,18 @@ class Scanner:
         num_str = self._source[self._start:self._current]
         self.add_token(TokenType.NUMBER, float(num_str))
 
-    def handle_identifier(self) -> None:
+    def identifier(self) -> None:
         self._current-=1
         text = self.extract_word()
-        token_type = reserved_keywords.get(text.lower(), TokenType.IDENTIFIER)
+        # This allows every capitalization of a keyword - AND, and, And, aND
+        text = text.lower()
+        token_type = (
+            reserved_keywords[text]
+            if text in reserved_keywords
+            else TokenType.IDENTIFIER
+        )
 
-        if token_type == TokenType.DEF:
-            self._func_def = True
-            self.add_token(token_type)
-            self.parse_function_signature()
-            self._func_def = False
-        elif token_type!=TokenType.PRINT and self.peek() == "(":
-            self.add_token(TokenType.FUNC_CALL)
-            self.parse_function_call()
-        else:
-            self.add_token(token_type)
-
-    def parse_function_call(self) -> None:
-        if not self.match("("):
-            self.error(f"Expected '(' after function call identifier")
-            return
-        self.advance_start()
-        self.advance()
-        self.add_token(TokenType.LEFT_PAREN)
-        self.advance_start()
-        while self.peek() in " \t":
-            self.advance()
-
-        while self.peek().isalpha() or self.peek().isdigit() or self.peek() == '"':
-            if self.peek().isalpha():
-                self.add_token(TokenType.PARAM, self.extract_word)
-            elif self.peek().isdigit():
-                self.number()
-            elif self.match_and_advance('"'):
-                self.string()
-                
-            while self.peek() in " \t":
-                self.advance()
-            
-            if self.peek() == ",":
-                self.advance()
-                self.add_token(TokenType.COMMA)
-            elif self.peek() == ")":
-                self.advance_start() # skip the other things so we only add a parenthesis without other shit
-                break
-            else:
-                self.error(f"Unexpected character in function call arguments: {self.peek()}")
-                return
-        if not self.match_and_advance(")"):
-            self.error(f"Expected ')' to close function call")
-            return
-        self.add_token(TokenType.RIGHT_PAREN)
+        self.add_token(token_type)
 
     def advance_start(self):
         self._start = self._current
@@ -226,65 +178,6 @@ class Scanner:
             self.advance()
         
         return self._source[self._start:self._current]
-
-    def parse_function_signature(self) -> None:
-        """Handles function definitions after encountering 'def'."""
-        # Expect a function name (identifier)
-        while self.peek() in " \t":  # Skip spaces before function name
-            self.advance()
-        
-        if not self.peek().isalpha():
-            self.error(f"Expected function name after 'def'")
-            return
-        
-        func_name = self.extract_word()
-        if func_name in reserved_keywords:
-            self.error(f"Error: Function name cannot be a reserved keyword")
-            return
-        self.add_token(TokenType.FUNC_NAME)
-        
-        # Expect a left parenthesis
-        while self.peek() in " \t":  # Skip spaces before (
-            self.advance()
-
-        if not self.match('('):
-            self.error(f"Expected '(' after function name not '{self.peek()}'")
-            return
-        self.advance_start() # skip the other things so we only add a parenthesis without other shit
-        self.advance()
-        self.add_token(TokenType.LEFT_PAREN)
-        
-        # Parse parameters (comma-separated identifiers)
-        while self.peek() in " \t":  # Skip spaces before parameters
-            self.advance()
-        
-        if self.peek().isalpha():  # Check if there are parameters
-            while True:
-                param_name = self.extract_word()
-                if param_name:  # Ensure it's not empty before adding
-                    self.add_token(TokenType.ARG)
-                
-                while self.peek() in " \t":  # Skip spaces before comma
-                    self.advance()
-                
-                if self.peek() == ",":
-                    self.advance()
-                    self.add_token(TokenType.COMMA)
-                elif self.peek() == ")":
-                    self.advance_start() # skip the other things so we only add a parenthesis without other shit
-                    break  # Stop if we reach closing parenthesis
-                else:
-                    self.error(f"Unexpected character in parameter list: {self.peek()}")
-                    return
-        
-        # Expect a right parenthesis
-        if not self.match_and_advance(")"):
-            self.error(f"Expected ')' to close function parameters")
-            return
-        self.add_token(TokenType.RIGHT_PAREN)
-        
-        # Reset function definition state
-        self._func_def = False
 
     def peek_next(self) -> str:
         return '\0' if self._current + 1 >= len(self._source) else self._source[self._current + 1]

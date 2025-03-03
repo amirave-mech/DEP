@@ -31,7 +31,7 @@ class TokenType(Enum):
     LESS_EQUAL = auto()
 
     # Literals
-    IDENTIFIER = auto()
+    IDENTIFIER = auto() # e.g. variables, functions etc.
     STRING = auto()
     NUMBER = auto()
 
@@ -47,13 +47,7 @@ class TokenType(Enum):
     NIL = auto()
     PRINT = auto()
     RETURN = auto()
-    VAR = auto()
     WHILE = auto()
-
     EOF = auto()
-    COLON = auto()
-    DEF = auto()
-    FUNC_NAME = auto()
-    PARAM = auto()
-    FUNC_CALL = auto()
-    ARG = auto()
+    UPTO = auto()
+    DOWNTO = auto()
