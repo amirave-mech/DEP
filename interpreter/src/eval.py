@@ -48,7 +48,7 @@ class Eval:
         # TODO: Verify type safety of `value`
         value = Eval.expression(expr.expression)
 
-        match expr.operator:
+        match expr.operator.tokenType:
             case TokenType.MINUS:
                 if not isinstance(value, float):
                     raise Exception(Eval.__format_invalid_literal(TokenType.MINUS))
@@ -70,15 +70,17 @@ class Eval:
 
         match expr.operator.tokenType:
             case TokenType.MINUS:
-                if not isinstance(left, float) or isinstance(right, float):
+                if not (isinstance(left, float) or isinstance(right, float)):
                     raise Exception(Eval.__format_invalid_literal(TokenType.MINUS))
                 return float(left) - float(right)
             case TokenType.SLASH:
-                if not isinstance(left, float) or isinstance(right, float):
+                if not (isinstance(left, float) or isinstance(right, float)):
                     raise Exception(Eval.__format_invalid_literal(TokenType.SLASH))
+                if float(right) == 0:
+                    raise Exception(ZeroDivisionError)
                 return float(left) / float(right)
             case TokenType.STAR:
-                if not isinstance(left, float) or isinstance(right, float):
+                if not (isinstance(left, float) or isinstance(right, float)):
                     raise Exception(Eval.__format_invalid_literal(TokenType.STAR))
                 return float(left) * float(right)
             case TokenType.PLUS:
