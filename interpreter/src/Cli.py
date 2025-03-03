@@ -1,5 +1,5 @@
-from interpreter.src.interpreter_handler import Interpreter, Journal
-from interpreter.src.journal.Journal import JournalSettings
+from interpreter.src.interpreter_handler import Interpreter
+from interpreter.src.journal.journal import JournalSettings, Journal
 
 
 class CLI:
