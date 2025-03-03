@@ -11,6 +11,32 @@ type Literal = str | float | bool
 # NOTE: While this class currently acts as a namespace, instance-based state will be held in later stages
 class Eval:
     @staticmethod
+    def evaluate(statements: list[Stmt]):
+        try:
+            for statement in statements:
+                Eval.execute_statement(statement)
+        except:
+            # TODO: Add runtime evaluation errors reporting
+            pass
+
+    @staticmethod
+    def execute_statement(statement: Stmt) -> None:
+        match statement:
+            case stmt.Print():
+                Eval.__visit_print_stmt(statement)
+            case stmt.Expression():
+                Eval.__visit_expr_stmt(statement)
+
+    @staticmethod
+    def __visit_print_stmt(stmt: stmt.Print):
+        expr = Eval.expression(stmt.expression)
+        print(expr)
+
+    @staticmethod
+    def __visit_expr_stmt(stmt: stmt.Expression):
+        _ = Eval.expression(stmt.expression)
+
+    @staticmethod
     def expression(ast: Expr) -> Literal:
         match ast:
             case expr.Literal():

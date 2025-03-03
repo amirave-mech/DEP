@@ -15,11 +15,16 @@ class Parser:
     def __init__(self, tokens: list[Token]) -> None:
         self._tokens = tokens
 
-    def parse(self) -> Expr | None:
+    def parse(self) -> list[Stmt] | None:
+        statements: list[Stmt] = []
+
         try:
-            return self.__expression()
+            while not self.__is_eof():
+                statements.append(self.__statement())
         except Exception as err:
             print("Failed to parse: {}".format(err))
+
+        return statements
 
     def __is_eof(self) -> bool:
         return self._pos == len(self._tokens) - 1
@@ -41,6 +46,24 @@ class Parser:
     def __match_tok_type(self, types: list[TokenType]) -> bool:
         curr_type = self.__peek().tokenType
         return any([tok_type == curr_type for tok_type in types])
+
+    # Statement parsing
+    # TODO: Ensure newline token after reading each statement
+    def __statement(self) -> Stmt:
+        if self.__peek().tokenType == TokenType.PRINT:
+            return self.__print_statement()
+
+        return self.__expression_statement()
+
+    def __print_statement(self) -> Stmt:
+        self.__advance()
+        val = self.__expression()
+        return stmt.Print(val)
+
+    def __expression_statement(self) -> Stmt:
+        self.__advance()
+        val = self.__expression()
+        return stmt.Expression(val)
 
     # Mutually recursing expression parsing
     def __expression(self) -> Expr:
