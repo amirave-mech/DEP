@@ -52,3 +52,6 @@ class TokenType(Enum):
 
     EOF = auto()
     COLON = auto()
+    DEF = auto()
+    FUNC_NAME = auto()
+    PARAM = auto()
