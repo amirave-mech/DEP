@@ -49,5 +49,6 @@ class TokenType(Enum):
     RETURN = auto()
     WHILE = auto()
     EOF = auto()
+    EOL = auto()
     UPTO = auto()
     DOWNTO = auto()

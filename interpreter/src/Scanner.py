@@ -73,6 +73,7 @@ class Scanner:
             case " " | "\r" | "\t":
                 pass  # Ignore spaces inside lines
             case "\n":
+                self.add_token(TokenType.EOL)
                 self._line += 1
                 self.handle_indentation()
             case '"':
