@@ -1,12 +1,6 @@
-import sys
 import os
 
-# Add "src/" to sys.path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "src")))
-
-# Import from src (No "src." prefix since sys.path is updated)
-from Scanner import Scanner
-
+from interpreter.src.Scanner import Scanner
 
 def test_scanner():
     source_file = os.path.abspath(os.path.join(os.path.dirname(__file__), "test_file_03.txt"))

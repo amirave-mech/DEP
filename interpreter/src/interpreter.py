@@ -1,7 +1,7 @@
-from .eval import Eval, Literal
-from .parser import Parser
-from .Scanner import Scanner
-from .expr import Expr
+from interpreter.src.eval import Eval, Literal
+from interpreter.src.parser import Parser
+from interpreter.src.Scanner import Scanner
+from interpreter.src.expr import Expr
 
 class Journal:
     def __init__(self, value):
