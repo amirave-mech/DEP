@@ -55,3 +55,5 @@ class TokenType(Enum):
     DEF = auto()
     FUNC_NAME = auto()
     PARAM = auto()
+    FUNC_CALL = auto()
+    ARG = auto()

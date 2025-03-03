@@ -14,7 +14,7 @@ reserved_keywords = {
     "true": TokenType.TRUE,
     "false": TokenType.FALSE,
     "nil": TokenType.NIL,
-    "def": TokenType.DEF
+    "function": TokenType.DEF
 }
 
 class Scanner:
@@ -38,7 +38,7 @@ class Scanner:
         #     print(new_var)
         # print("hi")
         while not self.is_at_end():
-            self._start = self._current
+            self.advance_start()
             self.scan_token()
 
         self._tokens.append(Token(TokenType.EOF, "", None, self._line, (self._current, self._current)))
@@ -84,7 +84,7 @@ class Scanner:
                 if c.isdigit():
                     self.number()
                 elif c.isalpha():
-                    self.identifier()
+                    self.handle_identifier()
                 else:
                     self.error(f"Unexpected character '{c}'")
 
@@ -96,7 +96,7 @@ class Scanner:
 
         if count > self._indent_stack[-1]:
             if not self._last_token_was_colon:
-                self.error(f"[Line {self._line}] Error: Indentation without preceding colon")
+                self.error(f"Error: Indentation without preceding colon")
             self._indent_stack.append(count)
             self.add_token(TokenType.START_SCOPE)
         elif count < self._indent_stack[-1]:
@@ -104,11 +104,13 @@ class Scanner:
                 self._indent_stack.pop()
                 self.add_token(TokenType.END_SCOPE)
         elif self._last_token_was_colon:
-            self.error(f"[Line {self._line}] Error: Expected indentation after colon")
+            self.error(f"Error: Expected indentation after colon")
         
         self._last_token_was_colon = False  # Reset only after checking indentation
 
     def advance(self) -> str:
+        if self.is_at_end():
+            return float('nan')
         self._current += 1
         return self._source[self._current - 1]
 
@@ -121,7 +123,7 @@ class Scanner:
         return self._current >= len(self._source)
 
     def match(self, expected: str) -> bool:
-        return self.is_at_end() or self._source[self._current] != expected
+        return (not self.is_at_end()) and self.peek() == expected
     
     # advances if the expected is matched
     def match_and_advance(self, expected: str) -> bool:
@@ -157,21 +159,60 @@ class Scanner:
         num_str = self._source[self._start:self._current]
         self.add_token(TokenType.NUMBER, float(num_str))
 
-    def identifier(self) -> None:
-        self._current -= 1 # it was already incremented falsly in the scan_token func
+    def handle_identifier(self) -> None:
+        self._current-=1
         text = self.extract_word()
-        
-        # Check if this is a reserved keyword
         token_type = reserved_keywords.get(text.lower(), TokenType.IDENTIFIER)
-        
-        # If it's a function definition, just enable parsing mode, don't extract again
+
         if token_type == TokenType.DEF:
             self._func_def = True
             self.add_token(token_type)
-            self.parse_function_signature()  # Call function signature parsing immediately
-            return  # Prevent double tokenization
-        
-        self.add_token(token_type)
+            self.parse_function_signature()
+            self._func_def = False
+        elif token_type!=TokenType.PRINT and self.peek() == "(":
+            self.add_token(TokenType.FUNC_CALL)
+            self.parse_function_call()
+        else:
+            self.add_token(token_type)
+
+    def parse_function_call(self) -> None:
+        if not self.match("("):
+            self.error(f"Expected '(' after function call identifier")
+            return
+        self.advance_start()
+        self.advance()
+        self.add_token(TokenType.LEFT_PAREN)
+        self.advance_start()
+        while self.peek() in " \t":
+            self.advance()
+
+        while self.peek().isalpha() or self.peek().isdigit() or self.peek() == '"':
+            if self.peek().isalpha():
+                self.add_token(TokenType.PARAM, self.extract_word)
+            elif self.peek().isdigit():
+                self.number()
+            elif self.match_and_advance('"'):
+                self.string()
+                
+            while self.peek() in " \t":
+                self.advance()
+            
+            if self.peek() == ",":
+                self.advance()
+                self.add_token(TokenType.COMMA)
+            elif self.peek() == ")":
+                self.advance_start() # skip the other things so we only add a parenthesis without other shit
+                break
+            else:
+                self.error(f"Unexpected character in function call arguments: {self.peek()}")
+                return
+        if not self.match_and_advance(")"):
+            self.error(f"Expected ')' to close function call")
+            return
+        self.add_token(TokenType.RIGHT_PAREN)
+
+    def advance_start(self):
+        self._start = self._current
 
     def extract_word(self) -> str:
         """Extracts a word (identifier or keyword), skipping leading whitespace but stopping at non-alphanumeric characters."""
@@ -179,7 +220,7 @@ class Scanner:
         while self.peek() in " \t":
             self.advance()
         
-        self._start = self._current  # Correctly set _start here
+        self.advance_start()  # Correctly set _start here
         
         while self.peek().isalnum() or self.peek() == "_":  # Allow underscores for variable names
             self.advance()
@@ -193,26 +234,24 @@ class Scanner:
             self.advance()
         
         if not self.peek().isalpha():
-            self.error(f"[Line {self._line}] Expected function name after 'def'")
+            self.error(f"Expected function name after 'def'")
             return
         
-        func_name = self.extract_word()  # Extract once, now correctly
+        func_name = self.extract_word()
         if func_name in reserved_keywords:
-            self.error(f"[Line {self._line}] Error: Function name cannot be a reserved keyword")
+            self.error(f"Error: Function name cannot be a reserved keyword")
             return
         self.add_token(TokenType.FUNC_NAME)
         
         # Expect a left parenthesis
         while self.peek() in " \t":  # Skip spaces before (
             self.advance()
-        
-    
-        if not self.match("("):
-            self.error(f"[Line {self._line}] Expected '(' after function name")
+
+        if not self.match('('):
+            self.error(f"Expected '(' after function name not '{self.peek()}'")
             return
-        else:
-            print("what the fuck")
-        self._start = self._current # skip the other things so we only add a parenthesis without other shit
+        self.advance_start() # skip the other things so we only add a parenthesis without other shit
+        self.advance()
         self.add_token(TokenType.LEFT_PAREN)
         
         # Parse parameters (comma-separated identifiers)
@@ -223,7 +262,7 @@ class Scanner:
             while True:
                 param_name = self.extract_word()
                 if param_name:  # Ensure it's not empty before adding
-                    self.add_token(TokenType.PARAM)
+                    self.add_token(TokenType.ARG)
                 
                 while self.peek() in " \t":  # Skip spaces before comma
                     self.advance()
@@ -232,15 +271,15 @@ class Scanner:
                     self.advance()
                     self.add_token(TokenType.COMMA)
                 elif self.peek() == ")":
-                    self._start = self._current # skip the other things so we only add a parenthesis without other shit
+                    self.advance_start() # skip the other things so we only add a parenthesis without other shit
                     break  # Stop if we reach closing parenthesis
                 else:
-                    self.error(f"[Line {self._line}] Unexpected character in parameter list: {self.peek()}")
+                    self.error(f"Unexpected character in parameter list: {self.peek()}")
                     return
         
         # Expect a right parenthesis
-        if not self.match(")"):
-            self.error(f"[Line {self._line}] Expected ')' to close function parameters")
+        if not self.match_and_advance(")"):
+            self.error(f"Expected ')' to close function parameters")
             return
         self.add_token(TokenType.RIGHT_PAREN)
         
@@ -252,3 +291,6 @@ class Scanner:
 
     def error(self, message: str) -> None:
         print(f"[Line {self._line}] Error: {message}")
+    
+    def extract_param(self):
+        self.adva
