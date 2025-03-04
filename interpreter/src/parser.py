@@ -2,6 +2,7 @@ import interpreter.src.expr as expr
 from interpreter.src.expr import Expr
 from interpreter.src.Token import Token
 from interpreter.src.token_type import TokenType
+from interpreter.src.stmt import Stmt
 
 # TODO:
 # - Improve error reporting, add concise failure messages (token position, etc..)

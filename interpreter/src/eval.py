@@ -2,6 +2,8 @@ import interpreter.src.expr as expr
 from interpreter.src.expr import Expr
 from interpreter.src.Token import Token
 from interpreter.src.token_type import TokenType
+import interpreter.src.stmt as stmt
+from stmt import Stmt
 
 type Literal = str | float | bool
 

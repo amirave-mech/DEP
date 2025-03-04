@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from src.expr import Expr
+from interpreter.src.expr import Expr
 
 type Stmt = Expression | Print
 
