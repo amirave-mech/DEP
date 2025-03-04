@@ -1,4 +1,4 @@
-from interpreter.src.Interpreter import Interpreter, Journal
+from interpreter.src.interpreter_handler import Interpreter, Journal
 
 
 interpreter = Interpreter()
