@@ -21,6 +21,6 @@ interpreter = Interpreter()
 cli = CLI(interpreter)
 cli.run()
 
-interpreter = Interpreter()
+# interpreter = Interpreter()
 
-print(interpreter.feedBlock(Journal("4+5")).value)
+# print(interpreter.feedBlock(Journal("4+5")).value)

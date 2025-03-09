@@ -3,6 +3,7 @@ from interpreter.src.expr import Expr
 from interpreter.src.Token import Token
 from interpreter.src.token_type import TokenType
 from interpreter.src.stmt import Stmt
+import interpreter.src.stmt as stmt
 
 # TODO:
 # - Improve error reporting, add concise failure messages (token position, etc..)
@@ -62,7 +63,6 @@ class Parser:
         return stmt.Print(val)
 
     def __expression_statement(self) -> Stmt:
-        self.__advance()
         val = self.__expression()
         return stmt.Expression(val)
 
@@ -161,6 +161,7 @@ class Parser:
             if not self.__match_tok_type([TokenType.RIGHT_PAREN]):
                 raise Exception("{}: expected ')'".format(self.__display_peek_info()))
 
+            self.__advance()
             return expr.Grouping(grouping_expr)
 
         raise Exception("{}: expected expression".format(self.__display_peek_info()))
