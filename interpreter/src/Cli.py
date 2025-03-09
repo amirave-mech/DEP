@@ -14,7 +14,7 @@ class CLI:
             try:
                 print(self.interpreter.feedBlock(Journal(line)).value)
             except Exception as e:
-                print(e)
+                print(f"Error: {e}")
 
 
 interpreter = Interpreter()
@@ -23,4 +23,3 @@ cli.run()
 
 interpreter = Interpreter()
 
-print(interpreter.feedBlock(Journal("4+5")).value)
