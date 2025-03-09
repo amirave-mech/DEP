@@ -5,7 +5,7 @@ function App() {
     let textArea: HTMLInputElement | null = document.getElementById('code') as HTMLInputElement;
     let serverResponse: HTMLElement | null = document.getElementById('serverResponse');
     if (textArea && serverResponse) {
-      fetchData(textArea.value).then(data => serverResponse.innerHTML = (data.message + '\n' + data.received).replace(/\n/g, '<br>') || data.error);
+      fetchData(textArea.value).then(data => serverResponse.innerHTML = (data.received).replace(/\n/g, '<br>') || data.error);
     }
   }
 
