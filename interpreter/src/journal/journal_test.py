@@ -1,4 +1,4 @@
-from interpreter.src.journal.Journal import *
+from interpreter.src.journal.journal import *
 import json
 
 def test_journal():
