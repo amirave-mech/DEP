@@ -1,6 +1,8 @@
+from typing import Callable
 import interpreter.src.expr as expr
 from interpreter.src.expr import Expr
 from interpreter.src.Token import Token
+from interpreter.src.journal.journal_events import *
 from interpreter.src.token_type import TokenType
 import interpreter.src.stmt as stmt
 from stmt import Stmt
@@ -13,7 +15,22 @@ type Literal = str | float | bool
 
 # NOTE: While this class currently acts as a namespace, instance-based state will be held in later stages
 class Eval:
-    _environment = Environment()
+    _environment: Environment = None
+    _event_listeners: list[Callable[[Event], None]] = []
+    
+    def __init__(self):
+        self._environment = Environment()
+        self._event_listeners = []
+        
+    def subscribe(self, listener: Callable[[Event], None]):
+        self._event_listeners.append(listener)
+        
+    def unsubscribe(self, listener: Callable[[Event], None]):
+        self._event_listeners.remove(listener)
+        
+    def _emit_event(self, event: Event):
+        for listener in self._event_listeners:
+            listener(event)
 
     def evaluate(self, statements: list[Stmt]):
         try:
@@ -34,13 +51,19 @@ class Eval:
 
     def __visit_print_stmt(self,statement: stmt.Print):
         expression = self.expression(statement.expression)
+        # TEMPORARY EVENT EMITTER
+        self._emit_event(PrintEvent(0, expression))
         print(expression)
 
     def __visit_expr_stmt(self,statement: stmt.Expression):
         _ = (self.expression(statement.expression))
 
     def __visit_assign_stmt(self, statement: stmt.Assignment):
-        self._environment.assign(statement.name, self.expression(statement.value))
+        new_value = self.expression(statement.value)
+        # TEMPORARY EVENT EMITTER
+        old_value = self._environment.get(statement.name)
+        self._emit_event(VariableAssignmentEvent(0, statement.name, old_value, new_value))
+        self._environment.assign(statement.name, new_value)
 
     def expression(self, ast: Expr) -> Literal:
         match ast:
