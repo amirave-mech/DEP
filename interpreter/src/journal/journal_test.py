@@ -1,4 +1,4 @@
-from journal import *
+from interpreter.src.journal.Journal import *
 import json
 
 def test_journal():
@@ -6,6 +6,7 @@ def test_journal():
     journal = Journal()
     
     # Simulate a function call with a loop and conditional
+
     func_call = FunctionCallEvent(journal._get_next_event_id(), "bubble_sort", [5, 2, 8, 1, 9])
     journal.add_event(func_call)
     func_call = FunctionCallEndEvent(journal._get_next_event_id())
