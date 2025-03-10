@@ -4,6 +4,7 @@ from interpreter.src.Token import Token
 from interpreter.src.token_type import TokenType
 import interpreter.src.stmt as stmt
 from stmt import Stmt
+from interpreter.src.environment import Environment
 
 type Literal = str | float | bool
 
@@ -12,48 +13,52 @@ type Literal = str | float | bool
 
 # NOTE: While this class currently acts as a namespace, instance-based state will be held in later stages
 class Eval:
-    @staticmethod
-    def evaluate(statements: list[Stmt]):
+    _environment = Environment()
+
+    def evaluate(self, statements: list[Stmt]):
         try:
             for statement in statements:
-                Eval.execute_statement(statement)
+                self.__execute_statement(statement)
         except:
             # TODO: Add runtime evaluation errors reporting
             pass
 
-    @staticmethod
-    def execute_statement(statement: Stmt) -> None:
+    def __execute_statement(self, statement: Stmt) -> None:
         match statement:
             case stmt.Print():
-                Eval.__visit_print_stmt(statement)
+                self.__visit_print_stmt(statement)
             case stmt.Expression():
-                Eval.__visit_expr_stmt(statement)
+                self.__visit_expr_stmt(statement)
+            case stmt.Assignment():
+                self.__visit_assign_stmt(statement)
 
-    @staticmethod
-    def __visit_print_stmt(stmt: stmt.Print):
-        expr = Eval.expression(stmt.expression)
-        print(expr)
+    def __visit_print_stmt(self,statement: stmt.Print):
+        expression = self.expression(statement.expression)
+        print(expression)
 
-    @staticmethod
-    def __visit_expr_stmt(stmt: stmt.Expression):
-        _ = Eval.expression(stmt.expression)
+    def __visit_expr_stmt(self,statement: stmt.Expression):
+        _ = (self.expression(statement.expression))
 
-    @staticmethod
-    def expression(ast: Expr) -> Literal:
+    def __visit_assign_stmt(self, statement: stmt.Assignment):
+        self._environment.assign(statement.name, self.expression(statement.value))
+
+    def expression(self, ast: Expr) -> Literal:
         match ast:
             case expr.Literal():
-                return Eval.__visit_literal(ast)
+                return self.__visit_literal(ast)
             case expr.Grouping():
-                return Eval.__visit_grouping(ast)
+                return self.__visit_grouping(ast)
             case expr.Unary():
-                return Eval.__visit_unary(ast)
+                return self.__visit_unary(ast)
             case expr.Binary():
-                return Eval.__visit_binary(ast)
+                return self.__visit_binary(ast)
 
     # Expression Visitors
-    @staticmethod
-    def __visit_literal(expr: expr.Literal) -> Literal:
+    def __visit_literal(self, expr: expr.Literal) -> Literal:
         # print(type(expr.value.literal))
+        if expr.value.tokenType == TokenType.IDENTIFIER:
+            return self._environment.get(expr.value.lexeme)
+
         if expr.value.literal is None:
             raise Exception("Unexpected non-literal token: {}".format(expr.value))
 
@@ -67,23 +72,21 @@ class Eval:
                     "Literal token of unexpected type: {}".format(expr.value)
                 )
 
-    @staticmethod
-    def __visit_grouping(expr: expr.Grouping) -> Literal:
-        return Eval.expression(expr.expression)
+    def __visit_grouping(self, expr: expr.Grouping) -> Literal:
+        return self.expression(expr.expression)
 
-    @staticmethod
-    def __visit_unary(expr: expr.Unary) -> Literal:
+    def __visit_unary(self, expr: expr.Unary) -> Literal:
         # TODO: Verify type safety of `value`
-        value = Eval.expression(expr.expression)
+        value = self.expression(expr.expression)
 
         match expr.operator.tokenType:
             case TokenType.MINUS:
                 if not isinstance(value, float):
-                    raise Exception(Eval.__format_invalid_literal(TokenType.MINUS))
+                    raise Exception(self.__format_invalid_literal(TokenType.MINUS))
                 value = -value
             case TokenType.BANG:
                 if not isinstance(value, bool):
-                    raise Exception(Eval.__format_invalid_literal(TokenType.BANG))
+                    raise Exception(self.__format_invalid_literal(TokenType.BANG))
                 # The language is strictly typed - the negation operator only works on booleans
                 value = not value
             case _:
@@ -91,25 +94,24 @@ class Eval:
 
         return value
 
-    @staticmethod
-    def __visit_binary(expr: expr.Binary) -> Literal:
-        left = Eval.expression(expr.left)
-        right = Eval.expression(expr.right)
+    def __visit_binary(self, expr: expr.Binary) -> Literal:
+        left = self.expression(expr.left)
+        right = self.expression(expr.right)
 
         match expr.operator.tokenType:
             case TokenType.MINUS:
                 if not (isinstance(left, float) or isinstance(right, float)):
-                    raise Exception(Eval.__format_invalid_literal(TokenType.MINUS))
+                    raise Exception(self.__format_invalid_literal(TokenType.MINUS))
                 return float(left) - float(right)
             case TokenType.SLASH:
                 if not (isinstance(left, float) or isinstance(right, float)):
-                    raise Exception(Eval.__format_invalid_literal(TokenType.SLASH))
+                    raise Exception(self.__format_invalid_literal(TokenType.SLASH))
                 if float(right) == 0:
                     raise Exception(ZeroDivisionError)
                 return float(left) / float(right)
             case TokenType.STAR:
                 if not (isinstance(left, float) or isinstance(right, float)):
-                    raise Exception(Eval.__format_invalid_literal(TokenType.STAR))
+                    raise Exception(self.__format_invalid_literal(TokenType.STAR))
                 return float(left) * float(right)
             case TokenType.PLUS:
                 if isinstance(left, float) and isinstance(right, float):
@@ -117,24 +119,24 @@ class Eval:
                 elif isinstance(left, str) and isinstance(right, str):
                     return left + right
                 else:
-                    raise Exception(Eval.__format_invalid_literal(TokenType.PLUS))
+                    raise Exception(self.__format_invalid_literal(TokenType.PLUS))
             case TokenType.GREATER:
                 if not isinstance(left, float) or isinstance(right, float):
-                    raise Exception(Eval.__format_invalid_literal(TokenType.GREATER))
+                    raise Exception(self.__format_invalid_literal(TokenType.GREATER))
                 return float(left) > float(right)
             case TokenType.GREATER_EQUAL:
                 if not isinstance(left, float) or isinstance(right, float):
                     raise Exception(
-                        Eval.__format_invalid_literal(TokenType.GREATER_EQUAL)
+                        self.__format_invalid_literal(TokenType.GREATER_EQUAL)
                     )
                 return float(left) >= float(right)
             case TokenType.LESS:
                 if not isinstance(left, float) or isinstance(right, float):
-                    raise Exception(Eval.__format_invalid_literal(TokenType.LESS))
+                    raise Exception(self.__format_invalid_literal(TokenType.LESS))
                 return float(left) < float(right)
             case TokenType.LESS_EQUAL:
                 if not isinstance(left, float) or isinstance(right, float):
-                    raise Exception(Eval.__format_invalid_literal(TokenType.LESS_EQUAL))
+                    raise Exception(self.__format_invalid_literal(TokenType.LESS_EQUAL))
                 return float(left) <= float(right)
             case TokenType.EQUAL_EQUAL:
                 return left == right
@@ -143,7 +145,6 @@ class Eval:
             case _:
                 raise Exception("Invalid binary operation: {}".format(expr.operator))
 
-    @staticmethod
-    def __format_invalid_literal(op_type: TokenType) -> str:
+    def __format_invalid_literal(self, op_type: TokenType) -> str:
         # TODO: Provide information about which literal token is invalid
         return "{} operator applied on an invalid literal type".format(op_type)

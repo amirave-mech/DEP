@@ -36,8 +36,8 @@ class Parser:
             raise Exception("already EOF")
         self._pos += 1
 
-    def __peek(self) -> Token:
-        return self._tokens[self._pos]
+    def __peek(self, step = 0) -> Token:
+        return self._tokens[self._pos+step]
 
     def __display_peek_info(self) -> str:
         tok = self.__peek()
@@ -52,15 +52,25 @@ class Parser:
     # Statement parsing
     # TODO: Ensure newline token after reading each statement
     def __statement(self) -> Stmt:
-        if self.__peek().tokenType == TokenType.PRINT:
-            return self.__print_statement()
-
+        match self.__peek().tokenType:
+            case TokenType.PRINT:
+                return self.__print_statement()
+            case TokenType.IDENTIFIER:
+                if (not self.__is_eof()) or self.__peek(1).tokenType == TokenType.LEFT_ARROW:
+                    return self.__assignment_statement()
         return self.__expression_statement()
 
     def __print_statement(self) -> Stmt:
         self.__advance()
         val = self.__expression()
         return stmt.Print(val)
+
+    def __assignment_statement(self) -> Stmt:
+        assignment = stmt.Assignment(self.__peek().lexeme, None)
+        self.__advance()
+        self.__advance()
+        assignment.value = self.__expression()
+        return assignment
 
     def __expression_statement(self) -> Stmt:
         val = self.__expression()
@@ -146,6 +156,7 @@ class Parser:
                 TokenType.TRUE,
                 TokenType.FALSE,
                 TokenType.NIL,
+                TokenType.IDENTIFIER
             ]
         ):
             literal = self.__peek()

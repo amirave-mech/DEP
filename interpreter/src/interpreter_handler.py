@@ -10,6 +10,8 @@ class Journal:
 
 
 class Interpreter:
+    _evaluator = Eval()
+
     def __init__(self):
         pass 
 
@@ -18,4 +20,4 @@ class Interpreter:
         tokens = scanner.scan_tokens()
         parser = Parser(tokens)
         stmt_ast_opt = parser.parse()
-        return Journal(Eval.evaluate(stmt_ast_opt))
+        return Journal(self._evaluator.evaluate(stmt_ast_opt))

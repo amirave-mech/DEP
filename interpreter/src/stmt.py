@@ -4,7 +4,9 @@ from dataclasses import dataclass
 
 from interpreter.src.expr import Expr
 
-type Stmt = Expression | Print
+from interpreter.src.Token import Token
+
+type Stmt = Expression | Print | Assignment
 
 
 @dataclass
@@ -15,3 +17,8 @@ class Expression:
 @dataclass
 class Print:
     expression: Expr
+
+@dataclass
+class Assignment:
+    name: str
+    value: Expr
