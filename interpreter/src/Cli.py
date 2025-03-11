@@ -1,6 +1,7 @@
 import json
+
 from interpreter.src.interpreter_handler import Interpreter
-from interpreter.src.journal.journal import JournalSettings, Journal
+from interpreter.src.journal.journal import JournalSettings
 
 
 class CLI:
@@ -24,8 +25,7 @@ class CLI:
                         should_print_journal = True
                     
                     result, journal = self._interpreter.feedBlock(line)
-                    print(result)
-                    
+
                     if should_print_journal:
                         print(json.dumps(journal.serialize(), indent=2))
                         
@@ -39,5 +39,5 @@ interpreter = Interpreter(journal_settings, False)
 cli = CLI(interpreter)
 cli.run()
 
-interpreter = Interpreter()
+interpreter = Interpreter(journal_settings)
 
