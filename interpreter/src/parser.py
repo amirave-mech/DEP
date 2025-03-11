@@ -60,6 +60,18 @@ class Parser:
                     return self.__assignment_statement()
         return self.__expression_statement()
 
+    def __block_statement(self) -> Stmt:
+        self.__advance()
+        statements: list[Stmt] = []
+
+        while(self.__peek().tokenType != TokenType.END_SCOPE and not self.__is_eof()):
+            statements.append(self.__statement())
+        
+        if(self.__match_tok_type([TokenType.END_SCOPE])):
+            return statements
+
+        raise Exception("expected end of block but reached: ", self.__peek())
+
     def __print_statement(self) -> Stmt:
         self.__advance()
         val = self.__expression()
