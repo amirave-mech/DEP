@@ -13,6 +13,7 @@
   "dependencies": {
     "@uiw/codemirror-themes-all": "^4.23.8",
     "@uiw/react-codemirror": "^4.23.8",
+    "lucide-react": "^0.479.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

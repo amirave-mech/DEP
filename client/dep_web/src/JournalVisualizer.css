@@ -1,0 +1,104 @@
+.journal-visualizer {
+    padding: 16px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    height: 100%;
+    overflow: auto;
+    background-color: var(--bg-tonal-a0, #121212);
+    color: var(--text-color, #e0e0e0);
+  }
+  
+  /* Event types styling */
+  .executing-block {
+    padding: 8px 16px;
+    margin-bottom: 12px;
+    border-radius: 4px;
+    background-color: var(--bg-tonal-a10, #1e1e1e);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    border: 1px solid #0d47a1;
+  }
+  
+  .variable-assignment {
+    padding: 8px;
+    margin: 8px 0;
+    background-color: var(--bg-tonal-a10, #1e1e1e);
+    border-radius: 4px;
+    font-family: monospace;
+    border: 1px solid #2e7d32;
+  }
+  
+  .condition-block {
+    padding: 8px;
+    margin: 8px 0;
+    background-color: var(--bg-tonal-a10, #1e1e1e);
+    border-radius: 4px;
+    border: 1px solid #0288d1;
+  }
+  
+  .condition-false {
+    border-color: #d32f2f;
+  }
+  
+  .code-step {
+    padding: 8px;
+    margin: 8px 0;
+    background-color: var(--bg-tonal-a10, #1e1e1e);
+    border-radius: 4px;
+    border: 1px solid #7b1fa2;
+  }
+  
+  .return-value {
+    padding: 8px;
+    margin: 8px 0;
+    background-color: var(--bg-tonal-a10, #1e1e1e);
+    border-radius: 4px;
+    border: 1px solid #f57c00;
+    display: flex;
+    align-items: center;
+  }
+  
+  /* Nested items styling */
+  .nested-step {
+    margin-left: 24px;
+    position: relative;
+  }
+  
+  /* Remove the vertical line for nested steps */
+  .nested-step::before {
+    display: none;
+  }
+  
+  /* Text formatting */
+  .text-gray-500 {
+    color: var(--bg-color-a50, #9e9e9e);
+  }
+  
+  .text-sm {
+    font-size: 0.875rem;
+  }
+  
+  .font-medium {
+    font-weight: 500;
+  }
+  
+  /* Fix for condition icons */
+  span[style*="color: red"] {
+    color: #f44336 !important;
+  }
+  
+  span[style*="color: green"] {
+    color: #4caf50 !important;
+  }
+  
+  pre {
+    background-color: var(--bg-tonal-a20, #212121);
+    padding: 8px;
+    border-radius: 4px;
+    overflow-x: auto;
+    color: var(--text-color, #e0e0e0);
+    margin: 0;
+  }
+  
+  /* Hide return emoji */
+  .return-value span {
+    display: none;
+  }

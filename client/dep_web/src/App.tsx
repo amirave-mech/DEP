@@ -5,15 +5,26 @@ import {OutputModule} from './OutputModule';
 
 function App() {
   const [codeText, setCodeText] = React.useState("console.log('hello world!');");
-    const onCodeTextChange = React.useCallback((val: React.SetStateAction<string>) => {
-        setCodeText(val);
-    }, []);
+  const onCodeTextChange = React.useCallback((val: React.SetStateAction<string>) => {
+    setCodeText(val);
+  }, []);
 
-  const [output, setOutput] = React.useState("");
+  // Update the initial state to be valid JSON that the JournalVisualizer can use
+  const [output, setOutput] = React.useState('');
+
 
   const sendCode = () => {
     if (codeText) {
-      fetchData(codeText).then(data => setOutput((data.message + '\n' + data.received) || data.error));
+      fetchData(codeText).then(data => {
+        // Properly format the returned data for the visualizer
+        if (data.journal) {
+          // If the backend already returns a journal format
+          setOutput(JSON.stringify(data.journal));
+        } else {
+          // Fallback to raw response
+          setOutput(JSON.stringify(data) || data.error);
+        }
+      });
     }
   }
 
@@ -22,7 +33,6 @@ function App() {
       <Header></Header>
       <div className="main-content">
         <div className="left-side">
-          {/* <h1>Enter your text here</h1> */}
           <CodeModule 
             value={codeText} 
             onChange={onCodeTextChange}
@@ -47,10 +57,11 @@ function Header() {
 
 async function fetchData(text: string) {
   try {
-    const options: RequestInit = { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(text) };
+    const options: RequestInit = {method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(text)};
     return fetch('http://localhost:5000/', options).then(response => response.json());
   } catch (error) {
-    console.error('Error fetching data: ', error);
+    console.error('Error fetching data: ', error);  
+    return { error: 'Failed to fetch data: ' + error };
   }
 }
 
