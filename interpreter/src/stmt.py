@@ -6,8 +6,7 @@ from interpreter.src.expr import Expr
 
 from interpreter.src.Token import Token
 
-type Stmt = Expression | Print | Assignment
-
+type Stmt = Expression | Print | Assignment | Block
 
 @dataclass
 class Expression:
@@ -22,3 +21,7 @@ class Print:
 class Assignment:
     name: str
     value: Expr
+
+@dataclass
+class Block:
+    statements: list[Stmt]
