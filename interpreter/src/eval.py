@@ -48,6 +48,8 @@ class Eval:
                 self.__visit_expr_stmt(statement)
             case stmt.Assignment():
                 self.__visit_assign_stmt(statement)
+            case stmt.Block():
+                self.__visit_block_stmt(statement)
 
     def __visit_print_stmt(self,statement: stmt.Print):
         expression = self.expression(statement.expression)
@@ -64,6 +66,11 @@ class Eval:
         old_value = self._environment.get(statement.name)
         self._emit_event(VariableAssignmentEvent(0, statement.name, old_value, new_value))
         self._environment.assign(statement.name, new_value)
+
+    def __visit_block_stmt(self, statement: stmt.Block):
+        self._environment = Environment(self._environment)
+        self.evaluate(statement.statements)
+        self._environment = self._environment.parent
 
     def expression(self, ast: Expr) -> Literal:
         match ast:
