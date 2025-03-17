@@ -13,6 +13,7 @@
     padding: 12px;
     background-color: var(--bg-tonal-a10);
     border-bottom: 1px solid var(--bg-color-a50);
+    justify-content: center;
   }
   
   .output-buttons button {
@@ -25,6 +26,7 @@
     font-weight: 500;
     cursor: pointer;
     transition: background-color 0.2s;
+    gap: 8px;
   }
   
   .run-button {
@@ -48,14 +50,20 @@
   .output-content {
     flex: 1;
     overflow: auto;
-    padding: 0;
+    padding: 16px;
     background-color: var(--bg-tonal-a0);
+  }
+
+  .loading-indicator {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    justify-content: center;
   }
   
   /* Styles for the visualization elements */
   .json-presenter {
     height: 100%;
-    padding: 16px;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     color: var(--text-color, #e0e0e0);
   }
