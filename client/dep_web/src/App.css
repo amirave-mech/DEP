@@ -2,19 +2,23 @@
   /* max-width: 1280px;
   margin: 0 auto;
   padding: 2rem; */
+
   width: 100vw;
   height: 100vh;
   text-align: center;
   display: flex;
   flex-direction: column;
+  background-color: var(--bg-tonal-a0);
 }
 
 .header {
-  background-color: gainsboro;
+  background-color: var(--bg-tonal-a10);
   /* color: white; */
   text-align: center;
   top: 0;
   width: 100%;
+
+  border-bottom: 1px solid var(--bg-color-a50);
   /* position: fixed; */
 }
 
@@ -27,25 +31,60 @@
 .main-content {
   display: flex;
   flex: 1;
+  overflow: auto;
   /* flex-grow: 1; */
 }
 
-.left-side, .right-side {
+.left-side,
+.right-side {
   width: 50%;
   padding: 20px;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
 }
 
 .left-side {
-  border-right: 1px solid #ccc;
+  border-right: 1px solid var(--bg-color-a50);
 }
 
-.text-area {
-  width: 100%;
-  height: 100%;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  resize: none;
-  font-size: 1em;
+.border {
+  /* width: auto; */
+  /* height: auto; */
+  flex: 1;
+
+  border-radius: 1em;
+  border: 1px solid var(--bg-color-a50);
+  overflow: hidden;
+}
+
+/* scrollbar stuff */
+
+::-webkit-scrollbar {
+  width: 5px;
+  /* Vertical scrollbar width */
+  height: 5px;
+  /* Horizontal scrollbar height */
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-tonal-a20);
+  /* Scroll thumb color */
+  border-radius: 10px;
+  /* Capsule shape */
+  /* border: 2px solid white; */
+  /* Inner line effect */
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-color-a10);
+  /* Track color */
+  border-radius: 10px;
+  /* Round track edges */
+  /* width: 2px; */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(100, 100, 100);
+  /* Darker grey on hover */
 }

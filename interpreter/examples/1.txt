@@ -1,0 +1,18 @@
+A <- [0,1,2,3,4,5]
+i <- 1
+j <- 2
+
+exchange A[i] <-> A[j]
+
+n <- length[A]
+
+
+enum TokenType {
+	Int(val: str),
+	String(str: str),
+	Var(name: str, literal: String | Double...)
+}
+
+Scanner(src: str) -> List[TokenType]
+
+"j <- 2" -> Var(name: "j", literal: 2)
