@@ -22,7 +22,10 @@ class Parser:
 
         try:
             while not self.__is_eof():
-                statements.append(self.__statement())
+                if self.__peek().tokenType == TokenType.EOL:
+                    self.__advance()
+                else:
+                    statements.append(self.__statement())
         except Exception as err:
             print("Failed to parse: {}".format(err))
 
@@ -49,6 +52,10 @@ class Parser:
         curr_type = self.__peek().tokenType
         return any([tok_type == curr_type for tok_type in types])
 
+    def __is_eol(self) -> bool:
+        return self.__peek().tokenType == TokenType.EOL
+
+
     # Statement parsing
     # TODO: Ensure newline token after reading each statement
     def __statement(self) -> Stmt:
@@ -58,6 +65,8 @@ class Parser:
             case TokenType.IDENTIFIER:
                 if (not self.__is_eof()) or self.__peek(1).tokenType == TokenType.LEFT_ARROW:
                     return self.__assignment_statement()
+            case TokenType.START_SCOPE:
+                return self.__block_statement()
         return self.__expression_statement()
 
     def __block_statement(self) -> Stmt:
@@ -68,6 +77,7 @@ class Parser:
             statements.append(self.__statement())
         
         if(self.__match_tok_type([TokenType.END_SCOPE])):
+            self.__advance()
             return statements
 
         raise Exception("expected end of block but reached: ", self.__peek())
@@ -75,6 +85,12 @@ class Parser:
     def __print_statement(self) -> Stmt:
         self.__advance()
         val = self.__expression()
+
+        if self.__is_eol():
+            self.__advance()
+        elif not self.__is_eof():
+            raise Exception("Expected end of line after statement")
+
         return stmt.Print(val)
 
     def __assignment_statement(self) -> Stmt:
@@ -82,10 +98,22 @@ class Parser:
         self.__advance()
         self.__advance()
         assignment.value = self.__expression()
+
+        if self.__is_eol():
+            self.__advance()
+        elif not self.__is_eof():
+            raise Exception("Expected end of line after statement")
+
         return assignment
 
     def __expression_statement(self) -> Stmt:
         val = self.__expression()
+
+        if self.__is_eol():
+            self.__advance()
+        elif not self.__is_eof():
+            raise Exception("Expected end of line after statement")
+
         return stmt.Expression(val)
 
     # Mutually recursing expression parsing
@@ -160,7 +188,6 @@ class Parser:
         return self.__primary()
 
     def __primary(self) -> Expr:
-        # TODO: Add identifiers (variable expressions)
         if self.__match_tok_type(
             [
                 TokenType.NUMBER,
