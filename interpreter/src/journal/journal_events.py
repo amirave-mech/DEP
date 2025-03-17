@@ -6,17 +6,22 @@ from typing import *
 class Event:
     """Base class for all events."""
     id: int
+    
+    # Class attribute for event identifier
+    EVENT_TYPE = None
 
     def serialize(self):
         """Base serialization method."""
+        event_type = self.EVENT_TYPE if self.EVENT_TYPE else self.__class__.__name__
         return {
-            "type": self.__class__.__name__,
+            "type": event_type,
             "id": self.id
         }
 
 
 @dataclass
 class ScopeStartEvent(Event):
+    """Base class for scope start events."""
     def serialize(self):
         """Serialize scope event with base event serialization."""
         base_serialization = super().serialize()
@@ -24,6 +29,7 @@ class ScopeStartEvent(Event):
     
 @dataclass
 class ScopeEndEvent(Event):
+    """Base class for scope end events."""
     def serialize(self):
         """Serialize scope event with base event serialization."""
         base_serialization = super().serialize()
@@ -32,6 +38,7 @@ class ScopeEndEvent(Event):
 
 @dataclass
 class IfStartEvent(ScopeStartEvent):
+    EVENT_TYPE = "IF"
     hit: bool
 
     def serialize(self):
@@ -50,6 +57,8 @@ class IfEndEvent(ScopeEndEvent):
 
 @dataclass
 class ElseStartEvent(ScopeStartEvent):
+    EVENT_TYPE = "ELSE"
+    
     def serialize(self):
         """Serialize ElseStartEvent with children."""
         base_serialization = super().serialize()
@@ -65,6 +74,7 @@ class ElseEndEvent(ScopeEndEvent):
 
 @dataclass
 class ForStartEvent(ScopeStartEvent):
+    EVENT_TYPE = "FOR"
     condition: str
 
     def serialize(self):
@@ -76,6 +86,7 @@ class ForStartEvent(ScopeStartEvent):
 
 @dataclass
 class ForIterationStartEvent(ScopeStartEvent):
+    EVENT_TYPE = "FOR_ITERATION"
     iterator: Any
 
     def serialize(self):
@@ -105,6 +116,7 @@ class ForEndEvent(ScopeEndEvent):
 
 @dataclass
 class VariableAssignmentEvent(Event):
+    EVENT_TYPE = "VARIABLE_ASSIGNMENT"
     var_name: str
     before: Any
     after: Any
@@ -122,6 +134,7 @@ class VariableAssignmentEvent(Event):
 
 @dataclass
 class PrintEvent(Event):
+    EVENT_TYPE = "PRINT"
     value: str
 
     def serialize(self):
@@ -133,6 +146,7 @@ class PrintEvent(Event):
 
 @dataclass
 class ReturnEvent(Event):
+    EVENT_TYPE = "RETURN"
     value: Any
 
     def serialize(self):
@@ -144,6 +158,7 @@ class ReturnEvent(Event):
 
 @dataclass
 class FunctionCallEvent(ScopeStartEvent):
+    EVENT_TYPE = "FUNCTION_CALL"
     name: str
     params: List[Any]
     
@@ -166,6 +181,7 @@ class FunctionCallEndEvent(ScopeEndEvent):
 
 @dataclass
 class ErrorEvent(Event):
+    EVENT_TYPE = "ERROR"
     info: str
 
     def serialize(self):
@@ -177,6 +193,7 @@ class ErrorEvent(Event):
 
 @dataclass
 class SwapEvent(Event):
+    EVENT_TYPE = "SWAP"
     var_names: Tuple[str, str]
     values: Tuple[Any, Any]
 
@@ -192,6 +209,7 @@ class SwapEvent(Event):
 
 @dataclass
 class ArrayModificationEvent(Event):
+    EVENT_TYPE = "ARRAY_MODIFICATION"
     index: Union[int, str]
     arr_before: List[Any]
     arr_after: List[Any]
