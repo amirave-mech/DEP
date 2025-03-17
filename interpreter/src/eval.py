@@ -5,7 +5,7 @@ from interpreter.src.Token import Token
 from interpreter.src.journal.journal_events import *
 from interpreter.src.token_type import TokenType
 import interpreter.src.stmt as stmt
-from stmt import Stmt
+from interpreter.src.stmt import Stmt
 from interpreter.src.environment import Environment
 
 type Literal = str | float | bool

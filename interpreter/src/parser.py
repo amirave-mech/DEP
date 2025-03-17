@@ -78,7 +78,7 @@ class Parser:
         
         if(self.__match_tok_type([TokenType.END_SCOPE])):
             self.__advance()
-            return statements
+            return stmt.Block(statements)
 
         raise Exception("expected end of block but reached: ", self.__peek())
 
