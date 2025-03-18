@@ -75,7 +75,26 @@ class Parser:
                 return self.__block_statement()
             case TokenType.IF:
                 return self.__if_statement()
+            case TokenType.WHILE:
+                return self.__while_statement()
         return self.__expression_statement()
+
+    def __while_statement(self) -> Stmt:
+        self.__advance()
+
+        if not self.__match_tok_type([TokenType.LEFT_PAREN]):
+            raise Exception("Expected '(' after 'while'")
+        self.__advance()
+
+        condition_expr = self.__expression()
+
+        if not self.__match_tok_type([TokenType.RIGHT_PAREN]):
+            raise Exception("Expected ')' after while statement condition")
+        self.__advance()
+
+        self.__advance_line()
+
+        return stmt.While(condition_expr, self.__statement())
 
     def __if_statement(self) -> Stmt:
         self.__advance()

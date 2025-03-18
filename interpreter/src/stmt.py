@@ -6,7 +6,7 @@ from interpreter.src.expr import Expr
 
 from interpreter.src.Token import Token
 
-type Stmt = Expression | Print | Assignment | Block
+type Stmt = Expression | Print | Assignment | Block | While
 
 @dataclass
 class Expression:
@@ -31,3 +31,8 @@ class If:
     condition: Expr
     then_block: Stmt
     else_block: Stmt | None
+
+@dataclass
+class While:
+    condition: Expr
+    body: Stmt

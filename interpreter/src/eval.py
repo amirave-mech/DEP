@@ -52,6 +52,8 @@ class Eval:
                 self.__visit_block_stmt(statement)
             case stmt.If():
                 self.__visit_if_stmt(statement)
+            case stmt.While():
+                self.__visit_while_stmt(statement)
 
     def __visit_print_stmt(self,statement: stmt.Print):
         expression = self.expression(statement.expression)
@@ -82,6 +84,10 @@ class Eval:
         elif statement.else_block is not None:
             self.__execute_statement(statement.else_block)
 
+    def __visit_while_stmt(self, statement: stmt.While):
+        while(self.expression(statement.condition)):
+            self.__execute_statement(statement.body)
+
     def expression(self, ast: Expr) -> Literal:
         match ast:
             case expr.Literal():
@@ -97,7 +103,6 @@ class Eval:
 
     # Expression Visitors
     def __visit_literal(self, expr: expr.Literal) -> Literal:
-        # print(type(expr.value.literal))
         if expr.value.tokenType == TokenType.IDENTIFIER:
             return self._environment.get(expr.value.lexeme)
 
@@ -159,17 +164,17 @@ class Eval:
 
         match expr.operator.tokenType:
             case TokenType.MINUS:
-                if not (isinstance(left, float) or isinstance(right, float)):
+                if not (isinstance(left, float) and isinstance(right, float)):
                     raise Exception(self.__format_invalid_literal(TokenType.MINUS))
                 return float(left) - float(right)
             case TokenType.SLASH:
-                if not (isinstance(left, float) or isinstance(right, float)):
+                if not (isinstance(left, float) and isinstance(right, float)):
                     raise Exception(self.__format_invalid_literal(TokenType.SLASH))
                 if float(right) == 0:
                     raise Exception(ZeroDivisionError)
                 return float(left) / float(right)
             case TokenType.STAR:
-                if not (isinstance(left, float) or isinstance(right, float)):
+                if not (isinstance(left, float) and isinstance(right, float)):
                     raise Exception(self.__format_invalid_literal(TokenType.STAR))
                 return float(left) * float(right)
             case TokenType.PLUS:
@@ -190,11 +195,11 @@ class Eval:
                     )
                 return float(left) >= float(right)
             case TokenType.LESS:
-                if not isinstance(left, float) or isinstance(right, float):
+                if not (isinstance(left, float) and isinstance(right, float)):
                     raise Exception(self.__format_invalid_literal(TokenType.LESS))
                 return float(left) < float(right)
             case TokenType.LESS_EQUAL:
-                if not isinstance(left, float) or isinstance(right, float):
+                if not (isinstance(left, float) and isinstance(right, float)):
                     raise Exception(self.__format_invalid_literal(TokenType.LESS_EQUAL))
                 return float(left) <= float(right)
             case TokenType.EQUAL_EQUAL:
