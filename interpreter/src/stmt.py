@@ -6,12 +6,11 @@ from interpreter.src.expr import Expr
 
 from interpreter.src.Token import Token
 
-type Stmt = Expression | Print | Assignment | Block | While
+type Stmt = Expression | Print | Assignment | Block | Void | FuncDef | FuncCall | While
 
 @dataclass
 class Expression:
     expression: Expr
-
 
 @dataclass
 class Print:
@@ -36,3 +35,18 @@ class If:
 class While:
     condition: Expr
     body: Stmt
+
+@dataclass
+class FuncDef:
+    name: str
+    params: list[str]
+    body: Block
+
+@dataclass
+class FuncCall:
+    func_name: str
+    params: list[any]
+
+@dataclass
+class Void:
+    pass

@@ -22,5 +22,11 @@ class Environment:
         else:
             self.variables[name] = value
 
+    def assign_to_root(self, name, value):
+        env = self
+        while env.parent is not None:
+            env = env.parent
+        env.assign(name, value)
+
     def __repr__(self):
         return f"Environment({self.variables}, parent={self.parent is not None})"
