@@ -48,13 +48,19 @@ class Parser:
             tok.line, tok.tokenType, tok.lexeme
         )
 
+    def __is_eol(self) -> bool:
+        return self.__peek().tokenType == TokenType.EOL
+
     def __match_tok_type(self, types: list[TokenType]) -> bool:
         curr_type = self.__peek().tokenType
         return any([tok_type == curr_type for tok_type in types])
 
-    def __is_eol(self) -> bool:
-        return self.__peek().tokenType == TokenType.EOL
-
+    # unless a block statement is seen, statements are separated by lines
+    def __advance_line(self):
+        if self.__is_eol():
+            self.__advance()
+        elif not self.__is_eof():
+            raise Exception("Expected end of line after statement")
 
     # Statement parsing
     # TODO: Ensure newline token after reading each statement
@@ -86,21 +92,16 @@ class Parser:
         self.__advance()
 
         # ensuring new line
-        if self.__is_eol():
-            self.__advance()
-        elif not self.__is_eof():
-            raise Exception("Expected end of line after condition")
+        self.__advance_line()
 
         then_block = self.__statement()
 
         else_block = None
         if self.__match_tok_type([TokenType.ELSE]):
             self.__advance()
+
             # ensuring new line
-            if self.__is_eol():
-                self.__advance()
-            elif not self.__is_eof():
-                raise Exception("Expected end of line after condition")
+            self.__advance_line()
 
             else_block = self.__statement()
 
@@ -123,10 +124,7 @@ class Parser:
         self.__advance()
         val = self.__expression()
 
-        if self.__is_eol():
-            self.__advance()
-        elif not self.__is_eof():
-            raise Exception("Expected end of line after statement")
+        self.__advance_line()
 
         return stmt.Print(val)
 
@@ -136,20 +134,14 @@ class Parser:
         self.__advance()
         assignment.value = self.__expression()
 
-        if self.__is_eol():
-            self.__advance()
-        elif not self.__is_eof():
-            raise Exception("Expected end of line after statement")
+        self.__advance_line()
 
         return assignment
 
     def __expression_statement(self) -> Stmt:
         val = self.__expression()
 
-        if self.__is_eol():
-            self.__advance()
-        elif not self.__is_eof():
-            raise Exception("Expected end of line after statement")
+        self.__advance_line()
 
         return stmt.Expression(val)
 
