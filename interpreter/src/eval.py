@@ -181,7 +181,7 @@ class Eval:
             case TokenType.EQUAL_EQUAL:
                 return left == right
             case TokenType.BANG_EQUAL:
-                return left == right
+                return left != right
             case _:
                 raise Exception("Invalid binary operation: {}".format(expr.operator))
 
