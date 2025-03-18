@@ -1,5 +1,5 @@
 import random
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 import concurrent.futures
 import uuid
 import time
@@ -7,7 +7,7 @@ from flask_cors import CORS
 import psutil
 from functools import wraps
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="../client/dep_web/dist", static_url_path="/")
 CORS(app)  # Allow requests from React frontend
 
 # If the task takes less than this time, we just return it on submit (to prevent extra requests)
@@ -102,6 +102,10 @@ def server_status():
         "cpu_usage": cpu_usage,
         "max_workers": MAX_WORKERS
     })
+
+@app.route('/')
+def home():
+    return send_from_directory(app.static_folder, "index.html")
 
 if __name__ == '__main__':
     app.run(debug=True)
