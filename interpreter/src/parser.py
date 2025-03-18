@@ -147,7 +147,33 @@ class Parser:
 
     # Mutually recursing expression parsing
     def __expression(self) -> Expr:
-        return self.__equality()
+        return self.__logical_or()
+
+    def __logical_or(self) -> Expr:
+        left_expr = self.__logical_and()
+
+        while self.__match_tok_type([TokenType.OR]):
+            operator = self.__peek()
+            self.__advance()
+
+            right_expr = self.__logical_and()
+
+            left_expr = expr.Logical(left_expr, operator, right_expr)
+
+        return left_expr
+
+    def __logical_and(self) -> Expr:
+        left_expr = self.__equality()
+
+        while self.__match_tok_type([TokenType.AND]):
+            operator = self.__peek()
+            self.__advance()
+
+            right_expr = self.__equality()
+
+            left_expr = expr.Logical(left_expr, operator, right_expr)
+
+        return left_expr
 
     def __equality(self) -> Expr:
         left_expr = self.__comparison()

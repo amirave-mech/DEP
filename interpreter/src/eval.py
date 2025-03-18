@@ -90,6 +90,8 @@ class Eval:
                 return self.__visit_grouping(ast)
             case expr.Unary():
                 return self.__visit_unary(ast)
+            case expr.Logical():
+                return self.__visit_logical(ast)
             case expr.Binary():
                 return self.__visit_binary(ast)
 
@@ -133,6 +135,23 @@ class Eval:
                 raise Exception("Unexpected unary operation: {}".format(expr.operator))
 
         return value
+
+    def __visit_logical(self, expr: expr.Binary) -> Literal:
+        left = self.expression(expr.left)
+
+        if not(isinstance(left, bool)):
+            raise Exception(self.__format_invalid_literal(expr.operator))
+
+        if expr.operator.tokenType == TokenType.OR and left:
+            return True
+        if expr.operator.tokenType == TokenType.AND and not left:
+            return False
+
+        right = self.expression(expr.right)
+        if not(isinstance(right, bool)):
+            raise Exception(self.__format_invalid_literal(expr.operator))
+
+        return right
 
     def __visit_binary(self, expr: expr.Binary) -> Literal:
         left = self.expression(expr.left)

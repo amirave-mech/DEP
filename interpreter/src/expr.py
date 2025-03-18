@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from interpreter.src.Token import Token
 from interpreter.src.token_type import TokenType
 
-type Expr = Grouping | Binary | Unary | Literal
+type Expr = Grouping | Binary | Logical | Unary | Literal
 
 
 @dataclass
@@ -21,6 +21,14 @@ class Binary:
     operator: Token
     right: Expr
 
+# Even though the `Binary` node structure is exactly the same,
+# the separation would be useful at the evaluation step since
+# in contrast to `Binary`, `Logical` nodes short circuit
+@dataclass
+class Logical:
+    left: Expr
+    operator: Token
+    right: Expr
 
 @dataclass
 class Unary:
@@ -38,6 +46,8 @@ def display(expr: Expr) -> str:
         case Grouping(expr):
             return "(group {})".format(display(expr))
         case Binary(left, operator, right):
+            return "({} {} {})".format(display(left), operator, display(right))
+        case Logical(left, operator, right):
             return "({} {} {})".format(display(left), operator, display(right))
         case Unary(operator, expr):
             return "({} {})".format(operator, display(expr))
