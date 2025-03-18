@@ -50,6 +50,8 @@ class Eval:
                 self.__visit_assign_stmt(statement)
             case stmt.Block():
                 self.__visit_block_stmt(statement)
+            case stmt.If():
+                self.__visit_if_stmt(statement)
 
     def __visit_print_stmt(self,statement: stmt.Print):
         expression = self.expression(statement.expression)
@@ -71,6 +73,14 @@ class Eval:
         self._environment = Environment(self._environment)
         self.evaluate(statement.statements)
         self._environment = self._environment.parent
+
+    def __visit_if_stmt(self, statement: stmt.If):
+        condition = self.expression(statement.condition)
+
+        if condition:
+            self.__execute_statement(statement.then_block)
+        elif statement.else_block is not None:
+            self.__execute_statement(statement.else_block)
 
     def expression(self, ast: Expr) -> Literal:
         match ast:

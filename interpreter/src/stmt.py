@@ -25,3 +25,9 @@ class Assignment:
 @dataclass
 class Block:
     statements: list[Stmt]
+
+@dataclass
+class If:
+    condition: Expr
+    then_block: Stmt
+    else_block: Stmt | None

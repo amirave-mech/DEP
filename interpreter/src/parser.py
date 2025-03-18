@@ -67,7 +67,44 @@ class Parser:
                     return self.__assignment_statement()
             case TokenType.START_SCOPE:
                 return self.__block_statement()
+            case TokenType.IF:
+                return self.__if_statement()
         return self.__expression_statement()
+
+    def __if_statement(self) -> Stmt:
+        self.__advance()
+        if not self.__match_tok_type([TokenType.LEFT_PAREN]):
+            raise Exception("Expected '(' after 'if'")
+        
+        self.__advance()
+        
+        condition_expr = self.__expression()
+
+        if not self.__match_tok_type([TokenType.RIGHT_PAREN]):
+            raise Exception("Expected ')' after if statement condition")
+        
+        self.__advance()
+
+        # ensuring new line
+        if self.__is_eol():
+            self.__advance()
+        elif not self.__is_eof():
+            raise Exception("Expected end of line after condition")
+
+        then_block = self.__statement()
+
+        else_block = None
+        if self.__match_tok_type([TokenType.ELSE]):
+            self.__advance()
+            # ensuring new line
+            if self.__is_eol():
+                self.__advance()
+            elif not self.__is_eof():
+                raise Exception("Expected end of line after condition")
+
+            else_block = self.__statement()
+
+        return stmt.If(condition_expr, then_block, else_block)
 
     def __block_statement(self) -> Stmt:
         self.__advance()
