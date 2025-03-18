@@ -2,7 +2,7 @@ import interpreter.src.expr as expr
 from interpreter.src.expr import Expr
 from interpreter.src.Token import Token
 from interpreter.src.token_type import TokenType
-from interpreter.src.stmt import Stmt, FuncDef
+from interpreter.src.stmt import Stmt, FuncDef, FuncCall
 import interpreter.src.stmt as stmt
 
 # TODO:
@@ -69,12 +69,14 @@ class Parser:
             case TokenType.PRINT:
                 return self.__print_statement()
             case TokenType.IDENTIFIER:
-                if (not self.__is_eof()):
+                if not self.__is_eof():
                     match self.__peek(1).tokenType:
                         case TokenType.LEFT_ARROW:
                             return self.__assignment_statement()
                         case TokenType.LEFT_PAREN:
-                            return self.__func_def()
+                            return self.__func_call()
+            case TokenType.FUNC_DECL:
+                return self.__func_def()
             case TokenType.START_SCOPE:
                 return self.__block_statement()
             case TokenType.IF:
@@ -161,11 +163,25 @@ class Parser:
 
         return assignment
 
-    def __func_def(self) -> Stmt:
+    def __func_call(self) -> Stmt:
         func_name = self.__peek().lexeme
         params = []
         self.__advance() # skip '('
         while not(self.__is_eof()) and not(self.__is_eol()) and self.__peek() == TokenType.RIGHT_PAREN:
+
+            self.__advance()
+            if self.__peek() != TokenType.COMMA or self.__peek() != TokenType.RIGHT_PAREN:
+                raise Exception("Expected ',' between parameter names")
+
+        if self.__peek() != TokenType.RIGHT_PAREN:
+            raise Exception("Expected ')' after function declaration")
+        return FuncCall(func_name, params)
+
+    def __func_def(self) -> Stmt:
+        func_name = self.__peek().lexeme
+        params = []
+        self.__advance()  # skip '('
+        while not (self.__is_eof()) and not (self.__is_eol()) and self.__peek() == TokenType.RIGHT_PAREN:
             if self.__peek() != TokenType.IDENTIFIER:
                 raise Exception("Expected params inside function declaration parentheses")
             params.append(self.__peek().lexeme)
@@ -174,10 +190,10 @@ class Parser:
                 raise Exception("Expected ',' between parameter names")
         if self.__peek() != TokenType.RIGHT_PAREN:
             raise Exception("Expected ')' after function declaration")
-        self.__advance() # skip ')'
+        self.__advance()  # skip ')'
         if not self.__is_eol():
             raise Exception("Expected newline after function declaration")
-        self.__advance() # move past the newline
+        self.__advance()  # move past the newline
         if self.__peek() != TokenType.START_SCOPE:
             raise Exception("Expected a code block after function declaration")
         block = self.__block_statement()

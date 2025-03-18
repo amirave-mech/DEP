@@ -41,7 +41,6 @@ class TokenType(Enum):
     AND = auto()
     OR = auto()
     ELSE = auto()
-    FUN = auto()
     FOR = auto()
     IF = auto()
     NIL = auto()
@@ -52,3 +51,4 @@ class TokenType(Enum):
     EOL = auto()
     UPTO = auto()
     DOWNTO = auto()
+    FUNC_DECL = auto()

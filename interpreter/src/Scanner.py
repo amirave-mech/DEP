@@ -14,7 +14,8 @@ reserved_keywords = {
     "false": TokenType.FALSE,
     "nil": TokenType.NIL,
     "to" : TokenType.UPTO,
-    "downto" : TokenType.DOWNTO
+    "downto" : TokenType.DOWNTO,
+    "function": TokenType.FUNC_DECL
 }
 
 class Scanner:
