@@ -1,13 +1,14 @@
 import './OutputModule.css';
 import JSONPresenter from './JSONPresenter';
-import { Play, Bug, Loader } from 'lucide-react';
+import { Play, Bug, Loader, AlertTriangle } from 'lucide-react';
 
 export function OutputModule(props: {
     runCode: () => void,
     runDebug: () => void,
     outputText: string,
     isLoading: boolean,
-    error: string
+    error: string,
+    serverMessage?: string
 }) {
     return (
         <div className="output-module">
@@ -35,7 +36,15 @@ export function OutputModule(props: {
                 )}
                 {props.error && (
                     <div className="error-message">
-                        {props.error}
+                        <div className="flex items-center text-red-600 bg-red-50 p-3 rounded-md">
+                            <AlertTriangle className="alert-style" size={24} />
+                            <span className="error-type">{props.error}</span>
+                        </div>
+                        {props.serverMessage && (
+                            <div className="server-error-message">
+                                <strong>Server Message:</strong> {props.serverMessage}
+                            </div>
+                        )}
                     </div>
                 )}
                 {!props.isLoading && !props.error && props.outputText && (

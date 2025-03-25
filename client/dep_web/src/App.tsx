@@ -12,6 +12,7 @@ function App() {
   const [output, setOutput] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState('');
+  const [serverMessage, setServerMessage] = React.useState('');
 
   const onCodeTextChange = React.useCallback((val: React.SetStateAction<string>) => {
     setCodeText(val);
@@ -23,12 +24,15 @@ function App() {
     setIsLoading(true);
     setError('');
     setOutput('');
+    setServerMessage('');
 
     const response = await fetchData(codeText, isDebug);
     if (response.status == "error") {
-      setError(response.message);
+      setError('Error executing code');
+      setServerMessage(response.message || 'Unknown error occurred');
     } else if (response.status == "timeout") {
-      setError(response.message);
+      setError('Timeout occurred');
+      setServerMessage(response.message || 'Request timed out');
     } else {
       setOutput(JSON.stringify(response.result));
     }
@@ -54,6 +58,7 @@ function App() {
             outputText={output}
             isLoading={isLoading}
             error={error}
+            serverMessage={serverMessage}
           />
         </div>
       </div>
