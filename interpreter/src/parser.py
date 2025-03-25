@@ -48,13 +48,19 @@ class Parser:
             tok.line, tok.tokenType, tok.lexeme
         )
 
+    def __is_eol(self) -> bool:
+        return self.__peek().tokenType == TokenType.EOL
+
     def __match_tok_type(self, types: list[TokenType]) -> bool:
         curr_type = self.__peek().tokenType
         return any([tok_type == curr_type for tok_type in types])
 
-    def __is_eol(self) -> bool:
-        return self.__peek().tokenType == TokenType.EOL
-
+    # unless a block statement is seen, statements are separated by lines
+    def __advance_line(self):
+        if self.__is_eol():
+            self.__advance()
+        elif not self.__is_eof():
+            raise Exception("Expected end of line after statement")
 
     # Statement parsing
     # TODO: Ensure newline token after reading each statement
@@ -67,7 +73,58 @@ class Parser:
                     return self.__assignment_statement()
             case TokenType.START_SCOPE:
                 return self.__block_statement()
+            case TokenType.IF:
+                return self.__if_statement()
+            case TokenType.WHILE:
+                return self.__while_statement()
         return self.__expression_statement()
+
+    def __while_statement(self) -> Stmt:
+        self.__advance()
+
+        if not self.__match_tok_type([TokenType.LEFT_PAREN]):
+            raise Exception("Expected '(' after 'while'")
+        self.__advance()
+
+        condition_expr = self.__expression()
+
+        if not self.__match_tok_type([TokenType.RIGHT_PAREN]):
+            raise Exception("Expected ')' after while statement condition")
+        self.__advance()
+
+        self.__advance_line()
+
+        return stmt.While(condition_expr, self.__statement())
+
+    def __if_statement(self) -> Stmt:
+        self.__advance()
+        if not self.__match_tok_type([TokenType.LEFT_PAREN]):
+            raise Exception("Expected '(' after 'if'")
+        
+        self.__advance()
+        
+        condition_expr = self.__expression()
+
+        if not self.__match_tok_type([TokenType.RIGHT_PAREN]):
+            raise Exception("Expected ')' after if statement condition")
+        
+        self.__advance()
+
+        # ensuring new line
+        self.__advance_line()
+
+        then_block = self.__statement()
+
+        else_block = None
+        if self.__match_tok_type([TokenType.ELSE]):
+            self.__advance()
+
+            # ensuring new line
+            self.__advance_line()
+
+            else_block = self.__statement()
+
+        return stmt.If(condition_expr, then_block, else_block)
 
     def __block_statement(self) -> Stmt:
         self.__advance()
@@ -78,7 +135,7 @@ class Parser:
         
         if(self.__match_tok_type([TokenType.END_SCOPE])):
             self.__advance()
-            return statements
+            return stmt.Block(statements)
 
         raise Exception("expected end of block but reached: ", self.__peek())
 
@@ -86,10 +143,7 @@ class Parser:
         self.__advance()
         val = self.__expression()
 
-        if self.__is_eol():
-            self.__advance()
-        elif not self.__is_eof():
-            raise Exception("Expected end of line after statement")
+        self.__advance_line()
 
         return stmt.Print(val)
 
@@ -99,26 +153,46 @@ class Parser:
         self.__advance()
         assignment.value = self.__expression()
 
-        if self.__is_eol():
-            self.__advance()
-        elif not self.__is_eof():
-            raise Exception("Expected end of line after statement")
+        self.__advance_line()
 
         return assignment
 
     def __expression_statement(self) -> Stmt:
         val = self.__expression()
 
-        if self.__is_eol():
-            self.__advance()
-        elif not self.__is_eof():
-            raise Exception("Expected end of line after statement")
+        self.__advance_line()
 
         return stmt.Expression(val)
 
     # Mutually recursing expression parsing
     def __expression(self) -> Expr:
-        return self.__equality()
+        return self.__logical_or()
+
+    def __logical_or(self) -> Expr:
+        left_expr = self.__logical_and()
+
+        while self.__match_tok_type([TokenType.OR]):
+            operator = self.__peek()
+            self.__advance()
+
+            right_expr = self.__logical_and()
+
+            left_expr = expr.Logical(left_expr, operator, right_expr)
+
+        return left_expr
+
+    def __logical_and(self) -> Expr:
+        left_expr = self.__equality()
+
+        while self.__match_tok_type([TokenType.AND]):
+            operator = self.__peek()
+            self.__advance()
+
+            right_expr = self.__equality()
+
+            left_expr = expr.Logical(left_expr, operator, right_expr)
+
+        return left_expr
 
     def __equality(self) -> Expr:
         left_expr = self.__comparison()

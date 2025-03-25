@@ -5,7 +5,7 @@ from interpreter.src.Token import Token
 from interpreter.src.journal.journal_events import *
 from interpreter.src.token_type import TokenType
 import interpreter.src.stmt as stmt
-from stmt import Stmt
+from interpreter.src.stmt import Stmt
 from interpreter.src.environment import Environment
 
 type Literal = str | float | bool
@@ -50,6 +50,10 @@ class Eval:
                 self.__visit_assign_stmt(statement)
             case stmt.Block():
                 self.__visit_block_stmt(statement)
+            case stmt.If():
+                self.__visit_if_stmt(statement)
+            case stmt.While():
+                self.__visit_while_stmt(statement)
 
     def __visit_print_stmt(self,statement: stmt.Print):
         expression = self.expression(statement.expression)
@@ -72,6 +76,18 @@ class Eval:
         self.evaluate(statement.statements)
         self._environment = self._environment.parent
 
+    def __visit_if_stmt(self, statement: stmt.If):
+        condition = self.expression(statement.condition)
+
+        if condition:
+            self.__execute_statement(statement.then_block)
+        elif statement.else_block is not None:
+            self.__execute_statement(statement.else_block)
+
+    def __visit_while_stmt(self, statement: stmt.While):
+        while(self.expression(statement.condition)):
+            self.__execute_statement(statement.body)
+
     def expression(self, ast: Expr) -> Literal:
         match ast:
             case expr.Literal():
@@ -80,12 +96,13 @@ class Eval:
                 return self.__visit_grouping(ast)
             case expr.Unary():
                 return self.__visit_unary(ast)
+            case expr.Logical():
+                return self.__visit_logical(ast)
             case expr.Binary():
                 return self.__visit_binary(ast)
 
     # Expression Visitors
     def __visit_literal(self, expr: expr.Literal) -> Literal:
-        # print(type(expr.value.literal))
         if expr.value.tokenType == TokenType.IDENTIFIER:
             return self._environment.get(expr.value.lexeme)
 
@@ -124,23 +141,40 @@ class Eval:
 
         return value
 
+    def __visit_logical(self, expr: expr.Binary) -> Literal:
+        left = self.expression(expr.left)
+
+        if not(isinstance(left, bool)):
+            raise Exception(self.__format_invalid_literal(expr.operator))
+
+        if expr.operator.tokenType == TokenType.OR and left:
+            return True
+        if expr.operator.tokenType == TokenType.AND and not left:
+            return False
+
+        right = self.expression(expr.right)
+        if not(isinstance(right, bool)):
+            raise Exception(self.__format_invalid_literal(expr.operator))
+
+        return right
+
     def __visit_binary(self, expr: expr.Binary) -> Literal:
         left = self.expression(expr.left)
         right = self.expression(expr.right)
 
         match expr.operator.tokenType:
             case TokenType.MINUS:
-                if not (isinstance(left, float) or isinstance(right, float)):
+                if not (isinstance(left, float) and isinstance(right, float)):
                     raise Exception(self.__format_invalid_literal(TokenType.MINUS))
                 return float(left) - float(right)
             case TokenType.SLASH:
-                if not (isinstance(left, float) or isinstance(right, float)):
+                if not (isinstance(left, float) and isinstance(right, float)):
                     raise Exception(self.__format_invalid_literal(TokenType.SLASH))
                 if float(right) == 0:
                     raise Exception(ZeroDivisionError)
                 return float(left) / float(right)
             case TokenType.STAR:
-                if not (isinstance(left, float) or isinstance(right, float)):
+                if not (isinstance(left, float) and isinstance(right, float)):
                     raise Exception(self.__format_invalid_literal(TokenType.STAR))
                 return float(left) * float(right)
             case TokenType.PLUS:
@@ -161,17 +195,17 @@ class Eval:
                     )
                 return float(left) >= float(right)
             case TokenType.LESS:
-                if not isinstance(left, float) or isinstance(right, float):
+                if not (isinstance(left, float) and isinstance(right, float)):
                     raise Exception(self.__format_invalid_literal(TokenType.LESS))
                 return float(left) < float(right)
             case TokenType.LESS_EQUAL:
-                if not isinstance(left, float) or isinstance(right, float):
+                if not (isinstance(left, float) and isinstance(right, float)):
                     raise Exception(self.__format_invalid_literal(TokenType.LESS_EQUAL))
                 return float(left) <= float(right)
             case TokenType.EQUAL_EQUAL:
                 return left == right
             case TokenType.BANG_EQUAL:
-                return left == right
+                return left != right
             case _:
                 raise Exception("Invalid binary operation: {}".format(expr.operator))
 
