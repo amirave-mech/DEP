@@ -12,12 +12,10 @@ import interpreter.src.stmt as stmt
 
 
 class Parser:
-    _tokens: list[Token]
-    _pos: int = 0
-
     def __init__(self, tokens: list[Token]) -> None:
         self._tokens = tokens
-
+        self._pos: int = 0
+        
     def parse(self) -> list[Stmt] | None:
         statements: list[Stmt] = []
 

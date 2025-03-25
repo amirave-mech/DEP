@@ -8,8 +8,6 @@ from interpreter.src.expr import display
 from interpreter.src.journal.journal import Journal, JournalSettings
 
 class Interpreter:
-    _evaluator = None
-
     # reset_journal indicates whether to reset the journal before each feedBlock
     def __init__(self, journal_settings: Optional[JournalSettings], reset_journal: bool = False):
         self._journal = None

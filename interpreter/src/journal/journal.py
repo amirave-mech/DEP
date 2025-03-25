@@ -9,38 +9,38 @@ class JournalSettings:
     max_length: int = 1000
     max_depth: int = 10
 
+OPENING_EVENTS = {
+    IfStartEvent: IfEndEvent,
+    ElseStartEvent: ElseEndEvent,
+    ForStartEvent: ForEndEvent,
+    ForIterationStartEvent: ForIterationEndEvent,
+    FunctionCallEvent: FunctionCallEndEvent  # Functions close with RETURN, but not required
+}
 
+# Closing scope events and their corresponding opening events
+CLOSING_EVENTS = {
+    IfEndEvent: IfStartEvent,
+    ElseEndEvent: ElseStartEvent,
+    ForEndEvent: ForStartEvent,
+    ForIterationEndEvent: ForIterationStartEvent,
+    FunctionCallEndEvent : FunctionCallEvent
+}
+    
+    
 class Journal:
-    OPENING_EVENTS = {
-        IfStartEvent: IfEndEvent,
-        ElseStartEvent: ElseEndEvent,
-        ForStartEvent: ForEndEvent,
-        ForIterationStartEvent: ForIterationEndEvent,
-        FunctionCallEvent: FunctionCallEndEvent  # Functions close with RETURN, but not required
-    }
-    
-    # Closing scope events and their corresponding opening events
-    CLOSING_EVENTS = {
-        IfEndEvent: IfStartEvent,
-        ElseEndEvent: ElseStartEvent,
-        ForEndEvent: ForStartEvent,
-        ForIterationEndEvent: ForIterationStartEvent,
-        FunctionCallEndEvent : FunctionCallEvent
-    }
-    
     def __init__(self, settings: Optional[JournalSettings] = None):
         self.settings = settings or JournalSettings()
         self.events: List[Event] = []
         self.current_event_id: int = 0
+        
+        self.tree: List = []
+        self.scope_json_stack: List = []
+        self.scope_event_stack: List = []
 
     def _get_next_event_id(self) -> int:
         event_id = self.current_event_id
         self.current_event_id += 1
         return event_id
-    
-    tree = []
-    scope_json_stack = []
-    scope_event_stack = []
 
     def add_event(self, event: Event) -> None:
         event_json = event.serialize()
@@ -50,7 +50,7 @@ class Journal:
         if isinstance(event, ScopeEndEvent):
             next_close = None
             if len(self.scope_event_stack) != 0:
-                next_close = self.OPENING_EVENTS[type(self.scope_event_stack[-1])]
+                next_close = OPENING_EVENTS[type(self.scope_event_stack[-1])]
             else:
                 print(f'[JOURNAL] Warning: Tried to close scope {event.EVENT_TYPE} but no scopes exist!')
             

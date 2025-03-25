@@ -19,17 +19,14 @@ reserved_keywords = {
 }
 
 class Scanner:
-    _source: str
-    _tokens: list[Token]
-    _start: int = 0
-    _current: int = 0
-    _line: int = 1
-    _indent_stack: list[int] = [0]
-    _func_def: bool = False # is set to True while a function is being defined, set to False when that is done
-    
     def __init__(self, source: str):
         self._source = source
-        self._tokens = []
+        self._tokens: list[Token] = []
+        self._start: int = 0
+        self._current: int = 0
+        self._line: int = 1
+        self._indent_stack: list[int] = [0]
+        self._func_def: bool = False # is set to True while a function is being defined, set to False when that is done
 
     def scan_tokens(self) -> list[Token]:
         while not self.is_at_end():

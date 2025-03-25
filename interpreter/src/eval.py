@@ -16,12 +16,9 @@ type Literal = str | float | bool
 
 # NOTE: While this class currently acts as a namespace, instance-based state will be held in later stages
 class Eval:
-    _environment: Environment = None
-    _event_listeners: list[Callable[[Event], None]] = []
-    
     def __init__(self):
         self._environment = Environment()
-        self._event_listeners = []
+        self._event_listeners: list[Callable[[Event], None]] = []
         
     def subscribe(self, listener: Callable[[Event], None]):
         self._event_listeners.append(listener)

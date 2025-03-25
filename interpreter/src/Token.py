@@ -2,12 +2,6 @@ from interpreter.src.token_type import TokenType
 
 
 class Token:
-    tokenType: TokenType
-    lexeme: str
-    literal = None
-    line: int
-    char_range: tuple[int, int]
-
     def __init__(
         self,
         tokenType: TokenType,
@@ -21,6 +15,7 @@ class Token:
         self.literal = literal
         self.line = line
         self.char_range = char_range
+
 
     def __str__(self):
         if self.literal is None:
