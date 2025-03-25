@@ -20,8 +20,8 @@ MAX_VRAM_USAGE_PERCENT = 99
 DEFAULT_TIMEOUT_SECONDS = 5
 
 whitelist = [
-    type(PrintEvent),
-    type(ErrorEvent),
+    PrintEvent,
+    ErrorEvent,
 ]
 RUN_JOURNAL_SETTINGS = JournalSettings(whitelist)
 DEBUG_JOURNAL_SETTINGS = JournalSettings()

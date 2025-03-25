@@ -39,7 +39,7 @@ class Journal:
         self.scope_event_stack: List = []
 
     def _is_event_allowed(self, event: Event):
-        return not self.settings.whitelist or type(event) in self.settings.whitelist
+        return not self.settings.whitelist or (type(event) in self.settings.whitelist)
 
     def add_event(self, event: Event) -> None:
         if not self._is_event_allowed(event):
