@@ -6,7 +6,7 @@ from interpreter.src.expr import Expr
 
 from interpreter.src.Token import Token
 
-type Stmt = Expression | Print | Assignment | Block | Void | FuncDef | FuncCall | While
+type Stmt = Expression | Print | Assignment | Block | FuncDef | While | If | Return
 
 @dataclass
 class Expression:
@@ -37,16 +37,15 @@ class While:
     body: Stmt
 
 @dataclass
-class FuncDef:
-    name: str
+class FuncBody:
     params: list[str]
     body: Block
 
 @dataclass
-class FuncCall:
+class FuncDef:
     func_name: str
-    params: list[any]
+    func: FuncBody
 
 @dataclass
-class Void:
-    pass
+class Return:
+    ret_val: Expr

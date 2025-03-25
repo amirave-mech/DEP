@@ -1,5 +1,6 @@
 from typing import Callable
 import interpreter.src.expr as expr
+from interpreter.src.exceptions import ReturnException
 from interpreter.src.expr import Expr
 from interpreter.src.Token import Token
 from interpreter.src.journal.journal_events import *
@@ -15,11 +16,12 @@ type Literal = str | float | bool
 
 # NOTE: While this class currently acts as a namespace, instance-based state will be held in later stages
 class Eval:
+    _global_env: Environment = None
     _environment: Environment = None
     _event_listeners: list[Callable[[Event], None]] = []
     
     def __init__(self):
-        self._environment = Environment()
+        self._environment = self._global_env = Environment()
         self._event_listeners = []
         
     def subscribe(self, listener: Callable[[Event], None]):
@@ -33,12 +35,8 @@ class Eval:
             listener(event)
 
     def evaluate(self, statements: list[Stmt]):
-        try:
-            for statement in statements:
-                self.__execute_statement(statement)
-        except:
-            # TODO: Add runtime evaluation errors reporting
-            pass
+        for statement in statements:
+            self.__execute_statement(statement)
 
     def __execute_statement(self, statement: Stmt) -> None:
         match statement:
@@ -54,6 +52,10 @@ class Eval:
                 self.__visit_if_stmt(statement)
             case stmt.While():
                 self.__visit_while_stmt(statement)
+            case stmt.FuncDef():
+                self.__visit_func_def(statement)
+            case stmt.Return():
+                self.__visit_return_stmt(statement)
 
     def __visit_print_stmt(self,statement: stmt.Print):
         expression = self.expression(statement.expression)
@@ -71,10 +73,13 @@ class Eval:
         self._emit_event(VariableAssignmentEvent(0, statement.name, old_value, new_value))
         self._environment.assign(statement.name, new_value)
 
-    def __visit_block_stmt(self, statement: stmt.Block):
-        self._environment = Environment(self._environment)
+    def __visit_block_stmt(self, statement: stmt.Block, new_env=None):
+        curr_env = self._environment
+        if new_env is None:
+            new_env = Environment(self._environment)
+        self._environment = new_env
         self.evaluate(statement.statements)
-        self._environment = self._environment.parent
+        self._environment = curr_env
 
     def __visit_if_stmt(self, statement: stmt.If):
         condition = self.expression(statement.condition)
@@ -88,6 +93,31 @@ class Eval:
         while(self.expression(statement.condition)):
             self.__execute_statement(statement.body)
 
+    def __visit_func_def(self, statement: stmt.FuncDef):
+        self._environment.assign_to_root(statement.func_name, statement.func)
+
+    def __visit_func_call(self, statement: expr.FuncCall):
+        func: stmt.FuncBody
+        func = self._environment.get(statement.func_name)
+        if type(func) is not stmt.FuncBody:
+            raise Exception("""An internal error has occurred, a function was used that was indeed not defined as a
+             function! For support please incessantly call 053-337-1749, thank you.""")
+        if len(func.params) is not len(statement.params):
+            raise Exception("""Error: mismatched number of parameters and arguments given!
+             For support please incessantly call 053-337-1749, thank you.""")
+        func_env = Environment(self._environment.get_root_env())
+        for p_name, p_val in zip(func.params, statement.params):
+            func_env.assign(p_name, self.expression(p_val))
+        try:
+            self.__visit_block_stmt(func.body, func_env)
+        except ReturnException as ret_val:
+            return ret_val.ret_val
+        return expr.Void
+
+    def __visit_return_stmt(self, statement: Stmt):
+        expression = self.expression(statement.ret_val)
+        raise ReturnException(expression)
+
     def expression(self, ast: Expr) -> Literal:
         match ast:
             case expr.Literal():
@@ -100,6 +130,8 @@ class Eval:
                 return self.__visit_logical(ast)
             case expr.Binary():
                 return self.__visit_binary(ast)
+            case expr.FuncCall():
+                return self.__visit_func_call(ast)
 
     # Expression Visitors
     def __visit_literal(self, expr: expr.Literal) -> Literal:

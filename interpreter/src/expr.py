@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from interpreter.src.Token import Token
 from interpreter.src.token_type import TokenType
 
-type Expr = Grouping | Binary | Logical | Unary | Literal
+type Expr = Grouping | Binary | Logical | Unary | Literal | FuncCall | Void
 
 
 @dataclass
@@ -40,6 +40,14 @@ class Unary:
 class Literal:
     value: Token
 
+@dataclass
+class FuncCall:
+    func_name: str
+    params: list[any]
+
+@dataclass
+class Void:
+    pass
 
 def display(expr: Expr) -> str:
     match expr:
