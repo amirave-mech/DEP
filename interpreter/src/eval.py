@@ -99,6 +99,9 @@ class Eval:
             self._emit_event(ElseStartEvent())
             self.__execute_statement(statement.else_block)
             self._emit_event(ElseEndEvent())
+        else:
+            self._emit_event(IfStartEvent(False))
+            self._emit_event(IfEndEvent())
             
         
 

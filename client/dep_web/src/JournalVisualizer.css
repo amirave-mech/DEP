@@ -37,6 +37,18 @@
   .condition-false {
     border-color: #d32f2f;
   }
+
+  .print-step {
+    padding: 8px;
+    margin: 8px 0;
+    background-color: var(--bg-tonal-a10, #1e1e1e);
+    border-radius: 4px;
+    border: 1px solid #c71414;
+  }
+
+  .print-step span {
+    font-family: monospace;
+  }
   
   .code-step {
     padding: 8px;

@@ -6,17 +6,30 @@ interface Event {
   name?: string;
   timestamp?: number;
   children?: Event[];
-  varName?: string;
-  before?: any;
-  after?: any;
-  value?: any;
-  condition?: string;
-  result?: boolean;
-  returnedValue?: any;
-  iterator?: number;
-  iterations?: number;
-  params?: any[];
-  scopeId?: string;
+  
+  // New Frontend Event Properties
+  hit?: boolean; // For IF events
+  condition?: string; // For IF, FOR, WHILE events
+  iteration_count?: number; // For FOR, WHILE events
+  iterator?: any; // For FOR_ITERATION
+  
+  var_name?: string; // For VARIABLE_ASSIGNMENT
+  before?: any; // For VARIABLE_ASSIGNMENT
+  after?: any; // For VARIABLE_ASSIGNMENT
+  
+  value?: any; // For PRINT events
+  
+  params?: any[]; // For FUNCTION_CALL
+  return_value?: any; // For FUNCTION_CALL
+  
+  info?: string; // For ERROR events
+  
+  var_names?: [string, string]; // For SWAP events
+  values?: [any, any]; // For SWAP events
+  
+  index?: number | string; // For ARRAY_MODIFICATION
+  arr_before?: any[]; // For ARRAY_MODIFICATION
+  arr_after?: any[]; // For ARRAY_MODIFICATION
 }
 
 interface Journal {
@@ -35,7 +48,7 @@ interface JournalVisualizerProps {
 
 const JournalVisualizer: React.FC<JournalVisualizerProps> = ({ journal }) => {
   if (!journal) {
-    return ('');
+    return null;
   }
   return (
     <div className="journal-visualizer">
@@ -52,16 +65,72 @@ interface EventRendererProps {
 }
 
 const EventRenderer: React.FC<EventRendererProps> = ({ event, depth }) => {
-  // Always expanded, no toggles
-  const isExpanded = true;
-
   const renderEventContent = () => {
     switch (event.type) {
-      case 'EXECUTING':
+      case 'IF':
         return (
-          <div className={`executing-block ${depth > 0 ? 'nested-step' : ''}`}>
-            <div className="font-medium">Executing "{event.name}"...</div>
-            {isExpanded && event.children && event.children.map((child, idx) => (
+          <div className={`condition-block ${event.hit === false ? 'condition-false' : ''} ${depth > 0 ? 'nested-step' : ''}`}>
+            <div>
+              If: {event.hit ? 'True' : 'False'}
+              {/* {event.hit === false ? <span style={{color: 'red'}}>✗</span> : <span style={{color: 'green'}}>✓</span>}  */}
+            </div>
+            {event.children && event.children.map((child, idx) => (
+              <EventRenderer key={idx} event={child} depth={depth + 1} />
+            ))}
+          </div>
+        );
+
+      case 'ELSE':
+        return (
+          <div className={`else-block ${depth > 0 ? 'nested-step' : ''}`}>
+            <div>Else block</div>
+            {event.children && event.children.map((child, idx) => (
+              <EventRenderer key={idx} event={child} depth={depth + 1} />
+            ))}
+          </div>
+        );
+
+      case 'FOR':
+        return (
+          <div className={`code-step ${depth > 0 ? 'nested-step' : ''}`}>
+            <div>
+              for {event.condition}
+              {event.iteration_count !== undefined && ` (${event.iteration_count} iterations)`}
+            </div>
+            {event.children && event.children.map((child, idx) => (
+              <EventRenderer key={idx} event={child} depth={depth + 1} />
+            ))}
+          </div>
+        );
+
+      case 'FOR_ITERATION':
+        return (
+          <div className={`code-step ${depth > 0 ? 'nested-step' : ''}`}>
+            <div>Iteration: {JSON.stringify(event.iterator)}</div>
+            {event.children && event.children.map((child, idx) => (
+              <EventRenderer key={idx} event={child} depth={depth + 1} />
+            ))}
+          </div>
+        );
+
+      case 'WHILE':
+        return (
+          <div className={`code-step ${depth > 0 ? 'nested-step' : ''}`}>
+            <div>
+              while {event.condition}
+              {event.iteration_count !== undefined && ` (${event.iteration_count} iterations)`}
+            </div>
+            {event.children && event.children.map((child, idx) => (
+              <EventRenderer key={idx} event={child} depth={depth + 1} />
+            ))}
+          </div>
+        );
+
+      case 'WHILE_ITERATION':
+        return (
+          <div className={`code-step ${depth > 0 ? 'nested-step' : ''}`}>
+            <div>While Iteration</div>
+            {event.children && event.children.map((child, idx) => (
               <EventRenderer key={idx} event={child} depth={depth + 1} />
             ))}
           </div>
@@ -70,87 +139,59 @@ const EventRenderer: React.FC<EventRendererProps> = ({ event, depth }) => {
       case 'VARIABLE_ASSIGNMENT':
         return (
           <div className={`variable-assignment ${depth > 0 ? 'nested-step' : ''}`}>
-            {event.varName} = {JSON.stringify(event.after)}
+            {event.var_name} = {JSON.stringify(event.after)}
             {event.before !== null && event.before !== undefined && (
               <span className="text-gray-500 text-sm"> (was: {JSON.stringify(event.before)})</span>
             )}
           </div>
         );
 
-      case 'CONDITION':
+      case 'PRINT':
         return (
-          <div className={`condition-block ${event.result === false ? 'condition-false' : ''} ${depth > 0 ? 'nested-step' : ''}`}>
-            <div>
-              {event.result === false ? <span style={{color: 'red'}}>✗</span> : <span style={{color: 'green'}}>✓</span>} {event.condition} - {event.result ? 'True' : 'False'}
-            </div>
-            {isExpanded && event.children && event.children.map((child, idx) => (
-              <EventRenderer key={idx} event={child} depth={depth + 1} />
-            ))}
+          <div className={`print-step ${depth > 0 ? 'nested-step' : ''}`}>
+            <div>Print: <span>{JSON.stringify(event.value)}</span></div>
           </div>
         );
 
-      case 'WHILE_START':
-        return (
-          <div className={`code-step ${depth > 0 ? 'nested-step' : ''}`}>
-            <div>while {event.condition}:</div>
-            {isExpanded && event.children && event.children.map((child, idx) => (
-              <EventRenderer key={idx} event={child} depth={depth + 1} />
-            ))}
-          </div>
-        );
-
-      case 'FOR_START':
-        return (
-          <div className={`code-step ${depth > 0 ? 'nested-step' : ''}`}>
-            <div>for {event.condition}:</div>
-            {isExpanded && event.children && event.children.map((child, idx) => (
-              <EventRenderer key={idx} event={child} depth={depth + 1} />
-            ))}
-          </div>
-        );
-
-      case 'FOR_ITERATION_START':
-        return (
-          <div className={`code-step ${depth > 0 ? 'nested-step' : ''}`}>
-            <div>Iteration {event.iterator}</div>
-          </div>
-        );
-
-      case 'FOR_ITERATION_END':
-        return (
-          <div className={`code-step ${depth > 0 ? 'nested-step' : ''}`}>
-            <div>End of iteration</div>
-          </div>
-        );
-
-      case 'FOR_END':
-        return (
-          <div className={`code-step ${depth > 0 ? 'nested-step' : ''}`}>
-            <div>Loop completed with {event.iterations} iterations</div>
-          </div>
-        );
-
-      case 'STEP':
       case 'FUNCTION_CALL':
         return (
           <div className={`code-step ${depth > 0 ? 'nested-step' : ''}`}>
             <div>
-              {event.name || "Step"} 
-              {event.params && event.params.length > 0 && 
-                <span>({event.params.map(p => JSON.stringify(p)).join(', ')})</span>
-              }
+              {event.name}({event.params ? event.params.map(p => JSON.stringify(p)).join(', ') : ''})
+              {event.return_value !== undefined && 
+                ` → ${JSON.stringify(event.return_value)}`}
             </div>
-            {isExpanded && event.children && event.children.map((child, idx) => (
+            {event.children && event.children.map((child, idx) => (
               <EventRenderer key={idx} event={child} depth={depth + 1} />
             ))}
           </div>
         );
 
-      case 'RETURN':
+      case 'ERROR':
         return (
-          <div className={`return-value ${depth > 0 ? 'nested-step' : ''}`}>
-            {/* Removed the emoji and "Return:" text */}
-            {JSON.stringify(event.value || event.returnedValue)}
+          <div className={`error-block ${depth > 0 ? 'nested-step' : ''}`}>
+            <div style={{color: 'red'}}>Error: {event.info}</div>
+          </div>
+        );
+
+      case 'SWAP':
+        return (
+          <div className={`swap-step ${depth > 0 ? 'nested-step' : ''}`}>
+            <div>
+              Swap: {event.var_names?.[0]} ↔ {event.var_names?.[1]} 
+              ({JSON.stringify(event.values?.[0])} ↔ {JSON.stringify(event.values?.[1])})
+            </div>
+          </div>
+        );
+
+      case 'ARRAY_MODIFICATION':
+        return (
+          <div className={`array-modification ${depth > 0 ? 'nested-step' : ''}`}>
+            <div>
+              Array[{event.index}] modified 
+              from {JSON.stringify(event.arr_before)} 
+              to {JSON.stringify(event.arr_after)}
+            </div>
           </div>
         );
 
