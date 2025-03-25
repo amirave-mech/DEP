@@ -40,6 +40,15 @@ class Unary:
 class Literal:
     value: Token
 
+@dataclass
+class ArrayLiteral:
+    elts: list[Expr]
+
+@dataclass
+class ArrayAccess:
+    name: str
+    idx: int
+
 
 def display(expr: Expr) -> str:
     match expr:

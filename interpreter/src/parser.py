@@ -27,8 +27,8 @@ class Parser:
 
         return statements
 
-    def __is_eof(self) -> bool:
-        return self._pos == len(self._tokens) - 1
+    def __is_eof(self, step = 0) -> bool:
+        return self._pos + step == len(self._tokens) - 1
 
     def __advance(self) -> None:
         if self.__is_eof():
@@ -65,8 +65,13 @@ class Parser:
             case TokenType.PRINT:
                 return self.__print_statement()
             case TokenType.IDENTIFIER:
-                if (not self.__is_eof()) or self.__peek(1).tokenType == TokenType.LEFT_ARROW:
-                    return self.__assignment_statement()
+                if not self.__is_eof():
+                    if self.__peek(1).tokenType == TokenType.LEFT_ARROW:
+                        return self.__assignment_statement()
+                    if self.__peek(1).tokenType == TokenType.LEFT_BRACKET and not self.__is_eof(4):
+                        if self.__peek(4).tokenType == TokenType.LEFT_ARROW:
+                            return self.__array_assignment_statement()
+                
             case TokenType.START_SCOPE:
                 return self.__block_statement()
             case TokenType.IF:
@@ -152,6 +157,27 @@ class Parser:
         self.__advance_line()
 
         return assignment
+
+    def __array_assignment_statement(self) -> Stmt:
+        identifier = self.__peek().lexeme
+
+        self.__advance()
+        self.__advance()
+
+        index = int(self.__peek().literal)
+        if not isinstance(index, int):
+            raise InterpreterException("{}: expected number index".format(self.__display_peek_info()))
+
+        self.__advance()
+        self.__advance()
+        self.__advance()
+
+        value = self.__expression()
+
+        self.__advance_line()
+
+        return stmt.ArrayAssignment(identifier, index, value)
+
 
     def __expression_statement(self) -> Stmt:
         val = self.__expression()
@@ -258,6 +284,24 @@ class Parser:
         return self.__primary()
 
     def __primary(self) -> Expr:
+        if (self.__peek().tokenType == TokenType.IDENTIFIER) and (not self.__is_eof()) and (self.__peek(1).tokenType == TokenType.LEFT_BRACKET):
+            name = self.__peek().lexeme
+
+            self.__advance()
+            self.__advance()
+
+            index = int(self.__peek().literal)
+            if not isinstance(index, int):
+                raise InterpreterException("{}: expected number index".format(self.__display_peek_info()))
+
+            self.__advance()
+            if not self.__match_tok_type([TokenType.RIGHT_BRACKET]):
+                raise InterpreterException("{}: expected ']' after array indexing".format(self.__display_peek_info()))
+
+            self.__advance()
+
+            return expr.ArrayAccess(name, index)
+
         if self.__match_tok_type(
             [
                 TokenType.NUMBER,
@@ -283,5 +327,21 @@ class Parser:
 
             self.__advance()
             return expr.Grouping(grouping_expr)
+
+        if self.__match_tok_type([TokenType.LEFT_BRACKET]):
+            self.__advance()
+
+            elts: list[Expr] = [self.__expression()]
+            while(self.__match_tok_type([TokenType.COMMA])):
+                self.__advance()
+
+                elt = self.__expression()
+                elts.append(elt)
+
+            if not self.__match_tok_type([TokenType.RIGHT_BRACKET]):
+                raise InterpreterException("{}: expected ']'".format(self.__display_peek_info()))
+            self.__advance()
+
+            return expr.ArrayLiteral(elts)
 
         raise InterpreterException("{}: expected expression".format(self.__display_peek_info()))
