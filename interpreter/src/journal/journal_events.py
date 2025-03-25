@@ -4,9 +4,7 @@ from typing import *
 
 @dataclass
 class Event:
-    """Base class for all events."""
-    id: int
-    
+    """Base class for all events."""    
     # Class attribute for event identifier
     EVENT_TYPE = None
 
@@ -15,7 +13,7 @@ class Event:
         event_type = self.EVENT_TYPE if self.EVENT_TYPE else self.__class__.__name__
         return {
             "type": event_type,
-            "id": self.id
+            # "id": self.id
         }
 
 
@@ -145,18 +143,6 @@ class PrintEvent(Event):
 
 
 @dataclass
-class ReturnEvent(Event):
-    EVENT_TYPE = "RETURN"
-    value: Any
-
-    def serialize(self):
-        """Serialize ReturnEvent with return value."""
-        base_serialization = super().serialize()
-        base_serialization["value"] = str(self.value)
-        return base_serialization
-
-
-@dataclass
 class FunctionCallEvent(ScopeStartEvent):
     EVENT_TYPE = "FUNCTION_CALL"
     name: str
@@ -174,6 +160,8 @@ class FunctionCallEvent(ScopeStartEvent):
 
 @dataclass
 class FunctionCallEndEvent(ScopeEndEvent):
+    return_value: any
+    
     def serialize(self):
         """Serialize FunctionCallEndEvent."""
         return super().serialize()

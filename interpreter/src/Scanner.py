@@ -1,4 +1,5 @@
 from interpreter.src.Token import Token
+from interpreter.src.interpreter_exception import InterpreterException
 from interpreter.src.token_type import TokenType
 
 reserved_keywords = {
@@ -37,6 +38,7 @@ class Scanner:
 
         self._tokens.append(Token(TokenType.EOF, "", None, self._line, (self._current, self._current)))
         return self._tokens
+         
 
     def scan_token(self) -> None:
         c = self.advance()
@@ -184,7 +186,7 @@ class Scanner:
         return '\0' if self._current + 1 >= len(self._source) else self._source[self._current + 1]
 
     def error(self, message: str) -> None:
-        print(f"[Line {self._line}] Error: {message}")
+        raise InterpreterException(f"[Line {self._line}] Error: {message}")
     
     def extract_param(self):
         self.adva

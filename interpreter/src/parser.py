@@ -1,6 +1,7 @@
 import interpreter.src.expr as expr
 from interpreter.src.expr import Expr
 from interpreter.src.Token import Token
+from interpreter.src.interpreter_exception import InterpreterException
 from interpreter.src.token_type import TokenType
 from interpreter.src.stmt import Stmt
 import interpreter.src.stmt as stmt
@@ -20,14 +21,11 @@ class Parser:
     def parse(self) -> list[Stmt] | None:
         statements: list[Stmt] = []
 
-        try:
-            while not self.__is_eof():
-                if self.__peek().tokenType == TokenType.EOL:
-                    self.__advance()
-                else:
-                    statements.append(self.__statement())
-        except Exception as err:
-            print("Failed to parse: {}".format(err))
+        while not self.__is_eof():
+            if self.__peek().tokenType == TokenType.EOL:
+                self.__advance()
+            else:
+                statements.append(self.__statement())
 
         return statements
 
@@ -36,7 +34,7 @@ class Parser:
 
     def __advance(self) -> None:
         if self.__is_eof():
-            raise Exception("already EOF")
+            raise InterpreterException("already EOF")
         self._pos += 1
 
     def __peek(self, step = 0) -> Token:
@@ -60,7 +58,7 @@ class Parser:
         if self.__is_eol():
             self.__advance()
         elif not self.__is_eof():
-            raise Exception("Expected end of line after statement")
+            raise InterpreterException("Expected end of line after statement")
 
     # Statement parsing
     # TODO: Ensure newline token after reading each statement
@@ -83,13 +81,13 @@ class Parser:
         self.__advance()
 
         if not self.__match_tok_type([TokenType.LEFT_PAREN]):
-            raise Exception("Expected '(' after 'while'")
+            raise InterpreterException("Expected '(' after 'while'")
         self.__advance()
 
         condition_expr = self.__expression()
 
         if not self.__match_tok_type([TokenType.RIGHT_PAREN]):
-            raise Exception("Expected ')' after while statement condition")
+            raise InterpreterException("Expected ')' after while statement condition")
         self.__advance()
 
         self.__advance_line()
@@ -99,14 +97,14 @@ class Parser:
     def __if_statement(self) -> Stmt:
         self.__advance()
         if not self.__match_tok_type([TokenType.LEFT_PAREN]):
-            raise Exception("Expected '(' after 'if'")
+            raise InterpreterException("Expected '(' after 'if'")
         
         self.__advance()
         
         condition_expr = self.__expression()
 
         if not self.__match_tok_type([TokenType.RIGHT_PAREN]):
-            raise Exception("Expected ')' after if statement condition")
+            raise InterpreterException("Expected ')' after if statement condition")
         
         self.__advance()
 
@@ -137,7 +135,7 @@ class Parser:
             self.__advance()
             return stmt.Block(statements)
 
-        raise Exception("expected end of block but reached: ", self.__peek())
+        raise InterpreterException("expected end of block but reached: ", self.__peek())
 
     def __print_statement(self) -> Stmt:
         self.__advance()
@@ -283,9 +281,9 @@ class Parser:
             grouping_expr = self.__expression()
 
             if not self.__match_tok_type([TokenType.RIGHT_PAREN]):
-                raise Exception("{}: expected ')'".format(self.__display_peek_info()))
+                raise InterpreterException("{}: expected ')'".format(self.__display_peek_info()))
 
             self.__advance()
             return expr.Grouping(grouping_expr)
 
-        raise Exception("{}: expected expression".format(self.__display_peek_info()))
+        raise InterpreterException("{}: expected expression".format(self.__display_peek_info()))

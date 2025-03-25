@@ -1,4 +1,3 @@
-import json
 from typing import Dict, List, Optional, Any, Union, Tuple
 from dataclasses import dataclass, field
 from interpreter.src.journal.journal_events import *
@@ -26,7 +25,6 @@ class Journal:
         ElseEndEvent: ElseStartEvent,
         ForEndEvent: ForStartEvent,
         ForIterationEndEvent: ForIterationStartEvent,
-        ReturnEvent: FunctionCallEvent,  # Special case for function returns
         FunctionCallEndEvent : FunctionCallEvent
     }
     
@@ -53,12 +51,16 @@ class Journal:
             next_close = None
             if len(self.scope_event_stack) != 0:
                 next_close = self.OPENING_EVENTS[type(self.scope_event_stack[-1])]
+            else:
+                print(f'[JOURNAL] Warning: Tried to close scope {event.EVENT_TYPE} but no scopes exist!')
             
             if next_close is not None and isinstance(event, next_close):
                 # append all the end event fields to the start event, so we have one complete event
                 self._append_dict(event_json, self.scope_json_stack[-1])
                 self.scope_json_stack.pop()
                 self.scope_event_stack.pop()
+            else:
+                print(f'[JOURNAL] Warning: expected to a scope close of type {next_close} but got {event.EVENT_TYPE}.')
                 
             return
         
