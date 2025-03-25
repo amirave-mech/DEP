@@ -24,13 +24,13 @@ function App() {
     setError('');
     setOutput('');
 
-    const result = await fetchData(codeText, isDebug);
-    if (result.error) {
-      setError(result.error);
-    } else if (result.journal) {
-      setOutput(JSON.stringify(result.journal));
+    const response = await fetchData(codeText, isDebug);
+    if (response.status == "error") {
+      setError(response.message);
+    } else if (response.status == "timeout") {
+      setError(response.message);
     } else {
-      setOutput(JSON.stringify(result));
+      setOutput(JSON.stringify(response.result));
     }
 
     setIsLoading(false);
@@ -135,26 +135,24 @@ async function pollForResults(taskId: string, pollingInterval = 1000): Promise<a
   });
 }
 
+// {"status": "completed", "result": journal}
+// {"status":"timeout/error", "message": "bla bla"}
 async function fetchData(text: string, isDebug: boolean): Promise<any> {
   try {
     // Submit the task
     const taskId = await submitTask(text, isDebug);
 
     if (!taskId) {
-      return { error: 'Failed to submit task' };
+      return { status: "error", message: 'Failed to submit task' };
     }
 
     // Poll for results until completion
     const result = await pollForResults(taskId, 1000);
 
-    if (result.status === 'completed') {
-      return result.result;
-    } else {
-      return { error: `Error: ${result.message || 'Unknown error'}` };
-    }
+    return result;
   } catch (error) {
     console.error('Error processing task: ', error);
-    return { error: 'Request failed, please try again.' };
+    return { status: "error", message: 'Request failed, please try again.' };
   }
 }
 
