@@ -166,15 +166,14 @@ class Parser:
     def __func_call(self) -> Stmt:
         func_name = self.__peek().lexeme
         params = []
-        self.__advance() # skip '('
         while not(self.__is_eof()) and not(self.__is_eol()) and self.__peek() == TokenType.RIGHT_PAREN:
-
             self.__advance()
+            params.append(self.__expression())
             if self.__peek() != TokenType.COMMA or self.__peek() != TokenType.RIGHT_PAREN:
                 raise Exception("Expected ',' between parameter names")
 
         if self.__peek() != TokenType.RIGHT_PAREN:
-            raise Exception("Expected ')' after function declaration")
+            raise Exception("Expected ')' after function call")
         return FuncCall(func_name, params)
 
     def __func_def(self) -> Stmt:
