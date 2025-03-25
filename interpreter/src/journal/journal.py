@@ -15,18 +15,10 @@ OPENING_EVENTS = {
     ElseStartEvent: ElseEndEvent,
     ForStartEvent: ForEndEvent,
     ForIterationStartEvent: ForIterationEndEvent,
+    WhileStartEvent: WhileEndEvent,
+    WhileIterationStartEvent: WhileIterationEndEvent,
     FunctionCallEvent: FunctionCallEndEvent  # Functions close with RETURN, but not required
 }
-
-# Closing scope events and their corresponding opening events
-CLOSING_EVENTS = {
-    IfEndEvent: IfStartEvent,
-    ElseEndEvent: ElseStartEvent,
-    ForEndEvent: ForStartEvent,
-    ForIterationEndEvent: ForIterationStartEvent,
-    FunctionCallEndEvent : FunctionCallEvent
-}
-    
     
 class Journal:
     def __init__(self, settings: JournalSettings):

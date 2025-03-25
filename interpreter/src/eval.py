@@ -91,13 +91,27 @@ class Eval:
         condition = self.expression(statement.condition)
 
         if condition:
+            self._emit_event(IfStartEvent(condition))
             self.__execute_statement(statement.then_block)
+            self._emit_event(IfEndEvent())
         elif statement.else_block is not None:
+            self._emit_event(ElseStartEvent())
             self.__execute_statement(statement.else_block)
+            self._emit_event(ElseEndEvent())
+            
+        
 
     def __visit_while_stmt(self, statement: stmt.While):
+        self._emit_event(WhileStartEvent("missing"))
+        
+        iterations = 0
         while(self.expression(statement.condition)):
+            self._emit_event(WhileIterationStartEvent())
             self.__execute_statement(statement.body)
+            iterations += 1
+            self._emit_event(WhileIterationEndEvent())
+            
+        self._emit_event(WhileEndEvent(iterations))
 
     def expression(self, ast: Expr) -> Literal:
         match ast:

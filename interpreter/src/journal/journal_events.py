@@ -110,6 +110,45 @@ class ForEndEvent(ScopeEndEvent):
         base_serialization = super().serialize()
         base_serialization["iterations"] = self.iterations
         return base_serialization
+    
+@dataclass
+class WhileStartEvent(ScopeStartEvent):
+    EVENT_TYPE = "WHILE"
+    condition: str
+
+    def serialize(self):
+        """Serialize WhileStartEvent with condition."""
+        base_serialization = super().serialize()
+        base_serialization["condition"] = self.condition
+        return base_serialization
+
+
+@dataclass
+class WhileIterationStartEvent(ScopeStartEvent):
+    EVENT_TYPE = "WHILE_ITERATION"
+
+    def serialize(self):
+        """Serialize WhileIterationStartEvent with iterator."""
+        base_serialization = super().serialize()
+        return base_serialization
+
+
+@dataclass
+class WhileIterationEndEvent(ScopeEndEvent):
+    def serialize(self):
+        """Serialize WhileIterationEndEvent."""
+        return super().serialize()
+
+
+@dataclass
+class WhileEndEvent(ScopeEndEvent):
+    iterations: int
+
+    def serialize(self):
+        """Serialize WhileEndEvent with iterations."""
+        base_serialization = super().serialize()
+        base_serialization["iterations"] = self.iterations
+        return base_serialization
 
 
 @dataclass
