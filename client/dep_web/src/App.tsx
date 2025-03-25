@@ -3,8 +3,12 @@ import './App.css';
 import { CodeModule } from './CodeModule';
 import { OutputModule } from './OutputModule';
 
+declare var __API_DOMAIN__: string;
+
+var domain: string = __API_DOMAIN__
+
 function App() {
-  const [codeText, setCodeText] = React.useState("console.log('hello world!');");
+  const [codeText, setCodeText] = React.useState("print('hello world!')");
   const [output, setOutput] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState('');
@@ -68,7 +72,8 @@ function Header() {
 // Submit a task to the server
 async function submitTask(taskData: string, isDebug: boolean) {
   try {
-    const response = await fetch('http://localhost:5000/api/submit', {
+    console.log(domain);
+    const response = await fetch(`${domain}/api/submit`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -94,7 +99,7 @@ async function submitTask(taskData: string, isDebug: boolean) {
 // Check the status of a submitted task
 async function checkTaskStatus(taskId: string): Promise<any> {
   try {
-    const response = await fetch(`http://localhost:5000/api/result/${taskId}`);
+    const response = await fetch(`${domain}/api/result/${taskId}`);
     const result = await response.json();
 
     return result;

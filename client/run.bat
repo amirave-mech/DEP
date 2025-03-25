@@ -3,6 +3,7 @@ if defined installed (
     py -m pip install pyautogui
 )
 cd dep_web
+echo. > flag
 call npm install >nul
 start /B npm start
 cd ..
