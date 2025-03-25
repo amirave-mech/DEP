@@ -23,6 +23,12 @@ class Assignment:
     value: Expr
 
 @dataclass
+class ArrayAssignment:
+    name: str
+    idx: int
+    value: Expr
+
+@dataclass
 class Block:
     statements: list[Stmt]
 

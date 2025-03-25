@@ -9,7 +9,7 @@ import interpreter.src.stmt as stmt
 from interpreter.src.stmt import Stmt
 from interpreter.src.environment import Environment
 
-type Literal = str | float | bool
+type Literal = str | float | bool | list[Literal]
 
 # TODO: Should `Token` hold booleans as literals and not just token types?
 
@@ -45,6 +45,8 @@ class Eval:
                 self.__visit_expr_stmt(statement)
             case stmt.Assignment():
                 self.__visit_assign_stmt(statement)
+            case stmt.ArrayAssignment():
+                self.__visit_array_assign_stmt(statement)
             case stmt.Block():
                 self.__visit_block_stmt(statement)
             case stmt.If():
@@ -68,6 +70,21 @@ class Eval:
         self._emit_event(VariableAssignmentEvent(statement.name, old_value, new_value))
         self._environment.assign(statement.name, new_value)
 
+    def __visit_array_assign_stmt(self, statement: stmt.ArrayAssignment):
+        new_value = self.expression(statement.value)
+
+        array = self._environment.get(statement.name)
+        # TODO: Notify journal of array modification
+        if not isinstance(array, list):
+            raise InterpreterException("Trying to access a non-array variable")
+
+        if statement.idx < 1 or statement.idx > len(array):
+            raise InterpreterException("Invalid array indexing, exceeding array size")
+
+        # TEMPORARY EVENT EMITTER
+        self._emit_event(ArrayModificationEvent(statement.name, array, new_value))
+        array[statement.idx - 1] = new_value
+
     def __visit_block_stmt(self, statement: stmt.Block):
         self._environment = Environment(self._environment)
         self.evaluate(statement.statements)
@@ -89,6 +106,10 @@ class Eval:
         match ast:
             case expr.Literal():
                 return self.__visit_literal(ast)
+            case expr.ArrayLiteral():
+                return self.__visit_array_literal(ast)
+            case expr.ArrayAccess():
+                return self.__visit_array_access(ast)
             case expr.Grouping():
                 return self.__visit_grouping(ast)
             case expr.Unary():
@@ -115,6 +136,26 @@ class Eval:
                 raise InterpreterException(
                     "Literal token of unexpected type: {}".format(expr.value)
                 )
+
+    def __visit_array_literal(self, expr: expr.ArrayLiteral) -> Literal:
+        evaluated_elts = []
+
+        for elt in expr.elts:
+            # TODO: Constrain array elements types to be of the same one
+            evaluated_elts.append(self.expression(elt))
+
+        return evaluated_elts
+
+    def __visit_array_access(self, expr: expr.ArrayAccess) -> Literal:
+        array = self._environment.get(expr.name)
+        # TODO: Notify journal of array modification
+        if not isinstance(array, list):
+            raise InterpreterException("Trying to access a non-array variable")
+
+        if expr.idx < 1 or expr.idx > len(array):
+            raise InterpreterException("Invalid array indexing, exceeding array size")
+
+        return array[expr.idx - 1]
 
     def __visit_grouping(self, expr: expr.Grouping) -> Literal:
         return self.expression(expr.expression)
