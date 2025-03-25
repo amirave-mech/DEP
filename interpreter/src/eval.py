@@ -136,11 +136,13 @@ class Eval:
         if expr.value.tokenType == TokenType.IDENTIFIER:
             return self._environment.get(expr.value.lexeme)
 
-        if expr.value.literal is None:
-            raise InterpreterException("Unexpected non-literal token: {}".format(expr.value))
+        if expr.value.tokenType == TokenType.TRUE:
+            return True
+        if expr.value.tokenType == TokenType.FALSE:
+            return False
 
         match expr.value.literal:
-            case str() | bool() | float():
+            case str() | float():
                 return expr.value.literal
             case int():
                 return float(expr.value.literal)
