@@ -28,13 +28,12 @@ from interpreter.src.eval import Eval
 # """
 
 SRC: Final = """
-x <- 1
-while(x < 10 and 2 * 4 = 8)
-    print x / 2
-    if(x / 2 = 0)
-        print x
-    x <- x + 1
-print "done!"
+x <- [1,2,3,4]
+i <- 1
+while (i < 5)
+    print(x[i])
+    i <- i + 1
+print("DONE")
 """
 
 scanner = Scanner(SRC)
