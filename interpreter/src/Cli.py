@@ -24,7 +24,7 @@ class CLI:
                         line = line[:-1]
                         should_print_journal = True
                     
-                    result, journal = self._interpreter.feedBlock(line)
+                    journal = self._interpreter.feedBlock(line)
 
                     if should_print_journal:
                         print(json.dumps(journal.serialize(), indent=2))

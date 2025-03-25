@@ -9,9 +9,9 @@ from interpreter.src.journal.journal import Journal, JournalSettings
 
 class Interpreter:
     # reset_journal indicates whether to reset the journal before each feedBlock
-    def __init__(self, journal_settings: Optional[JournalSettings], reset_journal: bool = False):
-        self._journal = None
-        self._journal_settings = journal_settings
+    def __init__(self, journal_settings: JournalSettings, reset_journal: bool = False):
+        self._journal: Journal = None
+        self._journal_settings: JournalSettings = journal_settings
         self._reset_journal = reset_journal
         
         self._evaluator = Eval()

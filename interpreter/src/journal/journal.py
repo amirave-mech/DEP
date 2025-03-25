@@ -2,10 +2,11 @@ from typing import Dict, List, Optional, Any, Union, Tuple
 from dataclasses import dataclass, field
 from interpreter.src.journal.journal_events import *
 
+# IMPORTANT - an event is allowed if its in the whitelist, or the whitelist is null
 @dataclass
 class JournalSettings:
     """Settings for the journal."""
-    event_logging: Dict[type, bool] = field(default_factory=dict)
+    whitelist: Dict[type, bool] = None
     max_length: int = 1000
     max_depth: int = 10
 
@@ -28,8 +29,8 @@ CLOSING_EVENTS = {
     
     
 class Journal:
-    def __init__(self, settings: Optional[JournalSettings] = None):
-        self.settings = settings or JournalSettings()
+    def __init__(self, settings: JournalSettings):
+        self.settings: JournalSettings = settings
         self.events: List[Event] = []
         self.current_event_id: int = 0
         
@@ -37,12 +38,13 @@ class Journal:
         self.scope_json_stack: List = []
         self.scope_event_stack: List = []
 
-    def _get_next_event_id(self) -> int:
-        event_id = self.current_event_id
-        self.current_event_id += 1
-        return event_id
+    def _is_event_allowed(self, event: Event):
+        return not self.settings.whitelist or type(event) in self.settings.whitelist
 
     def add_event(self, event: Event) -> None:
+        if not self._is_event_allowed(event):
+            return
+        
         event_json = event.serialize()
             
         # if its a closing event, append data to the matching start event and quit

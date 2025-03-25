@@ -8,6 +8,7 @@ import psutil
 from functools import wraps
 from interpreter.src.interpreter_handler import Interpreter
 from interpreter.src.journal.journal import JournalSettings
+from interpreter.src.journal.journal_events import ErrorEvent, PrintEvent
 
 app = Flask(__name__, static_folder="../client/dep_web/dist", static_url_path="/")
 CORS(app)  # Allow requests from React frontend
@@ -17,6 +18,13 @@ MIN_TASK_WAIT_SECONDS = 0.1
 MAX_WORKERS = 4
 MAX_VRAM_USAGE_PERCENT = 99
 DEFAULT_TIMEOUT_SECONDS = 5
+
+whitelist = [
+    type(PrintEvent),
+    type(ErrorEvent),
+]
+RUN_JOURNAL_SETTINGS = JournalSettings(whitelist)
+DEBUG_JOURNAL_SETTINGS = JournalSettings()
 
 # Configure thread pool
 executor = concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS)
@@ -38,9 +46,7 @@ def timeout_handler(seconds):
 @timeout_handler(DEFAULT_TIMEOUT_SECONDS)
 def execute_code(request_data):
     try:
-        # settings = JournalSettings()
-        # TODO filter to only prints and errors (:
-        interpreter = Interpreter(None, True)
+        interpreter = Interpreter(RUN_JOURNAL_SETTINGS, True)
         journal = interpreter.feedBlock(request_data)
         return {"status": "completed", "result": journal.serialize()}
     except Exception as e:
@@ -50,9 +56,9 @@ def execute_code(request_data):
 @timeout_handler(DEFAULT_TIMEOUT_SECONDS)
 def debug_code(request_data):
     try:
-        interpreter = Interpreter(None, True)
+        interpreter = Interpreter(DEBUG_JOURNAL_SETTINGS, True)
         journal = interpreter.feedBlock(request_data)
-        return {"status": "completed", "result": journal}
+        return {"status": "completed", "result": journal.serialize()}
     except Exception as e:
         print(f'[Server Error] {e}')
         return {"status": "error", "message": "Unhandled exception"}
