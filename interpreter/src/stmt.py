@@ -25,7 +25,7 @@ class Assignment:
 @dataclass
 class ArrayAssignment:
     name: str
-    idx: int
+    idx: Expr
     value: Expr
 
 @dataclass

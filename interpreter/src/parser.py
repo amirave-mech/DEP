@@ -164,14 +164,12 @@ class Parser:
         self.__advance()
         self.__advance()
 
-        index = int(self.__peek().literal)
-        if not isinstance(index, int):
-            raise InterpreterException("{}: expected number index".format(self.__display_peek_info()))
+        index = self.__expression()
 
         self.__advance()
         self.__advance()
-        self.__advance()
 
+        print(self.__peek())
         value = self.__expression()
 
         self.__advance_line()
@@ -290,11 +288,8 @@ class Parser:
             self.__advance()
             self.__advance()
 
-            index = int(self.__peek().literal)
-            if not isinstance(index, int):
-                raise InterpreterException("{}: expected number index".format(self.__display_peek_info()))
+            index = self.__expression()
 
-            self.__advance()
             if not self.__match_tok_type([TokenType.RIGHT_BRACKET]):
                 raise InterpreterException("{}: expected ']' after array indexing".format(self.__display_peek_info()))
 

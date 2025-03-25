@@ -75,12 +75,13 @@ class Eval:
         if not isinstance(array, list):
             raise InterpreterException("Trying to access a non-array variable")
 
-        if statement.idx < 1 or statement.idx > len(array):
+        index = int(self.expression(statement.idx))
+        if index < 1 or index > len(array):
             raise InterpreterException("Invalid array indexing, exceeding array size")
 
         # TEMPORARY EVENT EMITTER
         self._emit_event(ArrayModificationEvent(statement.name, array, new_value))
-        array[statement.idx - 1] = new_value
+        array[index - 1] = new_value
 
     def __visit_block_stmt(self, statement: stmt.Block):
         self._environment = Environment(self._environment)
@@ -163,10 +164,11 @@ class Eval:
         if not isinstance(array, list):
             raise InterpreterException("Trying to access a non-array variable")
 
-        if expr.idx < 1 or expr.idx > len(array):
+        index = int(self.expression(expr.idx))
+        if index < 1 or index > len(array):
             raise InterpreterException("Invalid array indexing, exceeding array size")
 
-        return array[expr.idx - 1]
+        return array[index - 1]
 
     def __visit_grouping(self, expr: expr.Grouping) -> Literal:
         return self.expression(expr.expression)
