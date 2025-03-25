@@ -6,6 +6,8 @@ import time
 from flask_cors import CORS
 import psutil
 from functools import wraps
+from interpreter.src.interpreter_handler import Interpreter
+from interpreter.src.journal.journal import JournalSettings
 
 app = Flask(__name__, static_folder="../client/dep_web/dist", static_url_path="/")
 CORS(app)  # Allow requests from React frontend
@@ -35,15 +37,25 @@ def timeout_handler(seconds):
 
 @timeout_handler(DEFAULT_TIMEOUT_SECONDS)
 def execute_code(request_data):
-    time.sleep(random.randint(0, 2)) # TODO replace with actual task
-    return {"status": "completed", "result": f"Processed: {request_data}"}
+    try:
+        # settings = JournalSettings()
+        # TODO filter to only prints and errors (:
+        interpreter = Interpreter(None, True)
+        journal = interpreter.feedBlock(request_data)
+        return {"status": "completed", "result": journal.serialize()}
+    except Exception as e:
+        print(f'[Server Error] {e}')
+        return {"status": "error", "message": "Unhandled exception"}
 
 @timeout_handler(DEFAULT_TIMEOUT_SECONDS)
 def debug_code(request_data):
-    time.sleep(random.randint(0, 2)) # TODO replace with actual task
-    return {"status": "completed", "result": f"Debugged: {request_data}"}
-    # alternatively, return:
-    # return {"status": "error", "message": "code crashed"}
+    try:
+        interpreter = Interpreter(None, True)
+        journal = interpreter.feedBlock(request_data)
+        return {"status": "completed", "result": journal}
+    except Exception as e:
+        print(f'[Server Error] {e}')
+        return {"status": "error", "message": "Unhandled exception"}
 
 @app.route('/api/submit', methods=['POST'])
 def submit_task():

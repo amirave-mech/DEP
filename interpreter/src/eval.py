@@ -2,6 +2,7 @@ from typing import Callable
 import interpreter.src.expr as expr
 from interpreter.src.expr import Expr
 from interpreter.src.Token import Token
+from interpreter.src.interpreter_exception import InterpreterException
 from interpreter.src.journal.journal_events import *
 from interpreter.src.token_type import TokenType
 import interpreter.src.stmt as stmt
@@ -33,12 +34,8 @@ class Eval:
             listener(event)
 
     def evaluate(self, statements: list[Stmt]):
-        try:
-            for statement in statements:
-                self.__execute_statement(statement)
-        except:
-            # TODO: Add runtime evaluation errors reporting
-            pass
+        for statement in statements:
+            self.__execute_statement(statement)
 
     def __execute_statement(self, statement: Stmt) -> None:
         match statement:
@@ -58,7 +55,7 @@ class Eval:
     def __visit_print_stmt(self,statement: stmt.Print):
         expression = self.expression(statement.expression)
         # TEMPORARY EVENT EMITTER
-        self._emit_event(PrintEvent(0, expression))
+        self._emit_event(PrintEvent(expression))
         print(expression)
 
     def __visit_expr_stmt(self,statement: stmt.Expression):
@@ -68,7 +65,7 @@ class Eval:
         new_value = self.expression(statement.value)
         # TEMPORARY EVENT EMITTER
         old_value = self._environment.get(statement.name)
-        self._emit_event(VariableAssignmentEvent(0, statement.name, old_value, new_value))
+        self._emit_event(VariableAssignmentEvent(statement.name, old_value, new_value))
         self._environment.assign(statement.name, new_value)
 
     def __visit_block_stmt(self, statement: stmt.Block):
@@ -107,7 +104,7 @@ class Eval:
             return self._environment.get(expr.value.lexeme)
 
         if expr.value.literal is None:
-            raise Exception("Unexpected non-literal token: {}".format(expr.value))
+            raise InterpreterException("Unexpected non-literal token: {}".format(expr.value))
 
         match expr.value.literal:
             case str() | bool() | float():
@@ -115,7 +112,7 @@ class Eval:
             case int():
                 return float(expr.value.literal)
             case _:
-                raise Exception(
+                raise InterpreterException(
                     "Literal token of unexpected type: {}".format(expr.value)
                 )
 
@@ -129,15 +126,15 @@ class Eval:
         match expr.operator.tokenType:
             case TokenType.MINUS:
                 if not isinstance(value, float):
-                    raise Exception(self.__format_invalid_literal(TokenType.MINUS))
+                    raise InterpreterException(self.__format_invalid_literal(TokenType.MINUS))
                 value = -value
             case TokenType.BANG:
                 if not isinstance(value, bool):
-                    raise Exception(self.__format_invalid_literal(TokenType.BANG))
+                    raise InterpreterException(self.__format_invalid_literal(TokenType.BANG))
                 # The language is strictly typed - the negation operator only works on booleans
                 value = not value
             case _:
-                raise Exception("Unexpected unary operation: {}".format(expr.operator))
+                raise InterpreterException("Unexpected unary operation: {}".format(expr.operator))
 
         return value
 
@@ -145,7 +142,7 @@ class Eval:
         left = self.expression(expr.left)
 
         if not(isinstance(left, bool)):
-            raise Exception(self.__format_invalid_literal(expr.operator))
+            raise InterpreterException(self.__format_invalid_literal(expr.operator))
 
         if expr.operator.tokenType == TokenType.OR and left:
             return True
@@ -154,7 +151,7 @@ class Eval:
 
         right = self.expression(expr.right)
         if not(isinstance(right, bool)):
-            raise Exception(self.__format_invalid_literal(expr.operator))
+            raise InterpreterException(self.__format_invalid_literal(expr.operator))
 
         return right
 
@@ -165,17 +162,17 @@ class Eval:
         match expr.operator.tokenType:
             case TokenType.MINUS:
                 if not (isinstance(left, float) and isinstance(right, float)):
-                    raise Exception(self.__format_invalid_literal(TokenType.MINUS))
+                    raise InterpreterException(self.__format_invalid_literal(TokenType.MINUS))
                 return float(left) - float(right)
             case TokenType.SLASH:
                 if not (isinstance(left, float) and isinstance(right, float)):
-                    raise Exception(self.__format_invalid_literal(TokenType.SLASH))
+                    raise InterpreterException(self.__format_invalid_literal(TokenType.SLASH))
                 if float(right) == 0:
-                    raise Exception(ZeroDivisionError)
+                    raise InterpreterException(ZeroDivisionError)
                 return float(left) / float(right)
             case TokenType.STAR:
                 if not (isinstance(left, float) and isinstance(right, float)):
-                    raise Exception(self.__format_invalid_literal(TokenType.STAR))
+                    raise InterpreterException(self.__format_invalid_literal(TokenType.STAR))
                 return float(left) * float(right)
             case TokenType.PLUS:
                 if isinstance(left, float) and isinstance(right, float):
@@ -183,31 +180,31 @@ class Eval:
                 elif isinstance(left, str) and isinstance(right, str):
                     return left + right
                 else:
-                    raise Exception(self.__format_invalid_literal(TokenType.PLUS))
+                    raise InterpreterException(self.__format_invalid_literal(TokenType.PLUS))
             case TokenType.GREATER:
                 if not isinstance(left, float) or isinstance(right, float):
-                    raise Exception(self.__format_invalid_literal(TokenType.GREATER))
+                    raise InterpreterException(self.__format_invalid_literal(TokenType.GREATER))
                 return float(left) > float(right)
             case TokenType.GREATER_EQUAL:
                 if not isinstance(left, float) or isinstance(right, float):
-                    raise Exception(
+                    raise InterpreterException(
                         self.__format_invalid_literal(TokenType.GREATER_EQUAL)
                     )
                 return float(left) >= float(right)
             case TokenType.LESS:
                 if not (isinstance(left, float) and isinstance(right, float)):
-                    raise Exception(self.__format_invalid_literal(TokenType.LESS))
+                    raise InterpreterException(self.__format_invalid_literal(TokenType.LESS))
                 return float(left) < float(right)
             case TokenType.LESS_EQUAL:
                 if not (isinstance(left, float) and isinstance(right, float)):
-                    raise Exception(self.__format_invalid_literal(TokenType.LESS_EQUAL))
+                    raise InterpreterException(self.__format_invalid_literal(TokenType.LESS_EQUAL))
                 return float(left) <= float(right)
             case TokenType.EQUAL_EQUAL:
                 return left == right
             case TokenType.BANG_EQUAL:
                 return left != right
             case _:
-                raise Exception("Invalid binary operation: {}".format(expr.operator))
+                raise InterpreterException("Invalid binary operation: {}".format(expr.operator))
 
     def __format_invalid_literal(self, op_type: TokenType) -> str:
         # TODO: Provide information about which literal token is invalid
