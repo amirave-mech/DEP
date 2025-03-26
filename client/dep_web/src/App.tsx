@@ -45,7 +45,7 @@ function App() {
     setOutput('');
     setServerMessage('');
 
-    const response = await fetchData(codeText, isDebug);
+    const response = await fetchData(codeText + '\n', isDebug);
     if (response.status == "error") {
       setError('Error executing code');
       setServerMessage(response.message || 'Unknown error occurred');
