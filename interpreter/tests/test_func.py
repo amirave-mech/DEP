@@ -11,12 +11,23 @@ from interpreter.src.token_type import TokenType
 from interpreter.src.eval import Eval
 
 SRC: Final = """
-function yuvi_cruvi(x, y)
-    x <- x + y
-    return x
-b <- 2
-sum <- yuvi_cruvi(b, 3)
+function yuvi_cruvi(arr, len)
+    i <- 1
+    sum <- 0
+    while (i <= len)
+        sum <- sum + arr[i]
+        i <- i+1
+    return sum
+function factorial(n)
+    if (n = 0)
+        return 1
+    else
+        return n*factorial(n-1)
+b <- [0,1,2,3]
+sum <- yuvi_cruvi(b, 4)
 print(sum)
+ten_fact <- factorial(10)
+print(ten_fact)
 """
 
 # scanner = Scanner(SRC)
