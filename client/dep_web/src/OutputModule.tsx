@@ -1,5 +1,6 @@
 import './OutputModule.css';
-import JSONPresenter from './JSONPresenter';
+// import JSONPresenter from './JSONPresenter';
+import JournalVisualizer from './JournalVisualizer';
 import { Play, Bug, Loader, AlertTriangle } from 'lucide-react';
 
 export function OutputModule(props: {
@@ -11,7 +12,7 @@ export function OutputModule(props: {
     serverMessage?: string
 }) {
     return (
-        <div className="output-module">
+        <div className="border output-module">
             <div className="output-buttons">
                 <button
                     onClick={props.runCode}
@@ -48,7 +49,8 @@ export function OutputModule(props: {
                     </div>
                 )}
                 {!props.isLoading && !props.error && props.outputText && (
-                    <JSONPresenter jsonString={props.outputText} />
+                    // <JSONPresenter jsonString={props.outputText} />
+                    <JournalVisualizer journal={JSON.parse(props.outputText)}/>
                 )}
             </div>
         </div>

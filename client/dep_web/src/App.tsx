@@ -2,6 +2,8 @@ import React, { useEffect } from 'react';
 import './App.css';
 import { CodeModule } from './CodeModule';
 import { OutputModule } from './OutputModule';
+import Header from './Header';
+import TutorialModal from './TutorialModal';
 
 declare var __API_DOMAIN__: string;
 
@@ -13,6 +15,8 @@ function App() {
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState('');
   const [serverMessage, setServerMessage] = React.useState('');
+
+  const [showTutorial, setShowTutorial] = React.useState(false);
 
   const onCodeTextChange = React.useCallback((val: React.SetStateAction<string>) => {
     setCodeText(val);
@@ -55,9 +59,14 @@ function App() {
     setIsLoading(false);
   };
 
+  const showTutorialModal = () => {
+    console.log(showTutorial);
+    setShowTutorial(true);
+  }
+
   return (
     <>
-      <Header></Header>
+      <Header onOpenTutorial={showTutorialModal}></Header>
       <div className="main-content">
         <div className="left-side">
           <CodeModule
@@ -76,16 +85,10 @@ function App() {
             serverMessage={serverMessage}
           />
         </div>
+
+        <TutorialModal isOpen={showTutorial} setIsOpen={setShowTutorial} />
       </div>
     </>
-  )
-}
-
-function Header() {
-  return (
-    <div className='header'>
-      <h1 className='title'>Pcode</h1>
-    </div>
   )
 }
 

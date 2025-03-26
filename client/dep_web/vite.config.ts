@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import fs from 'fs';
 import path from 'path';
+import tailwindcss from '@tailwindcss/vite'
 
 const flagPath = path.resolve(__dirname, 'flag');
 const isLocal = fs.existsSync(flagPath)
@@ -13,7 +14,7 @@ if (isLocal) {
 }
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
   define: {
     __API_DOMAIN__: JSON.stringify(domain)
   }
