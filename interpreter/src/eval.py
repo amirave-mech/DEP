@@ -136,13 +136,11 @@ class Eval:
             self._emit_event(IfStartEvent(False))
             self._emit_event(IfEndEvent())
 
-
-
     def __visit_while_stmt(self, statement: stmt.While):
         self._emit_event(WhileStartEvent("missing"))
 
         iterations = 0
-        while(self.expression(statement.condition)):
+        while self.expression(statement.condition):
             self._emit_event(WhileIterationStartEvent())
             self.__execute_statement(statement.body)
             iterations += 1

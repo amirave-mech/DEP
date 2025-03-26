@@ -16,7 +16,7 @@ function yuvi_cruvi(arr, len)
     sum <- 0
     while (i <= len)
         sum <- sum + arr[i]
-        arr[i] = -1
+        arr[i]  <- -1
         i <- i+1
     return sum
 function factorial(n)

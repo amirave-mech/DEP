@@ -70,9 +70,11 @@ class Parser:
                 return self.__print_statement()
             case TokenType.IDENTIFIER:
                 if not self.__is_eof():
-                    match self.__peek(1).tokenType:
-                        case TokenType.LEFT_ARROW:
-                            return self.__assignment_statement()
+                    if self.__peek(1).tokenType == TokenType.LEFT_ARROW:
+                        return self.__assignment_statement()
+                    if self.__peek(1).tokenType == TokenType.LEFT_BRACKET and not self.__is_eof(4):
+                        if self.__peek(4).tokenType == TokenType.LEFT_ARROW:
+                            return self.__array_assignment_statement()
             case TokenType.FUNC_DECL:
                 return self.__func_def()
             case TokenType.START_SCOPE:
