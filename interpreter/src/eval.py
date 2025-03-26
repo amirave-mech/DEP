@@ -85,8 +85,9 @@ class Eval:
             raise InterpreterException("Invalid array indexing, exceeding array size")
 
         # TEMPORARY EVENT EMITTER
-        self._emit_event(ArrayModificationEvent(statement.name, array, new_value))
+        temp = array.copy()
         array[index - 1] = new_value
+        self._emit_event(ArrayModificationEvent(statement.name, array, temp))
 
     def __visit_block_stmt(self, statement: stmt.Block, new_env=None):
         curr_env = self._environment
@@ -136,13 +137,11 @@ class Eval:
             self._emit_event(IfStartEvent(False))
             self._emit_event(IfEndEvent())
 
-
-
     def __visit_while_stmt(self, statement: stmt.While):
         self._emit_event(WhileStartEvent("missing"))
 
         iterations = 0
-        while(self.expression(statement.condition)):
+        while self.expression(statement.condition):
             self._emit_event(WhileIterationStartEvent())
             self.__execute_statement(statement.body)
             iterations += 1
