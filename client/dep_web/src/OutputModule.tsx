@@ -18,14 +18,14 @@ export function OutputModule(props: {
                     className="run-button"
                     disabled={props.isLoading}
                 >
-                    <><Play size={16} className="mr-1" /> Run 🐫🐫🐫🐫</>
+                    <><Play size={16} className="mr-1" /> Run 🐫🐫🐫🐫 (F5)</>
                 </button>
                 <button
                     onClick={props.runDebug}
                     className="debug-button"
                     disabled={props.isLoading}
                 >
-                    <Bug size={16} className="mr-1" /> Debug
+                    <Bug size={16} className="mr-1" /> Debug (Shift+F5)
                 </button>
             </div>
             <div className="output-content">

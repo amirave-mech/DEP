@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import './App.css';
 import { CodeModule } from './CodeModule';
 import { OutputModule } from './OutputModule';
@@ -17,6 +17,21 @@ function App() {
   const onCodeTextChange = React.useCallback((val: React.SetStateAction<string>) => {
     setCodeText(val);
   }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "F5") {
+        event.preventDefault();
+        event.shiftKey? runCode(true) : runCode(false);
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    }
+  })
 
   const runCode = async (isDebug: boolean) => {
     if (!codeText) return;
