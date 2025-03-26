@@ -37,7 +37,7 @@ export function OutputModule(props: {
                 )}
                 {props.error && (
                     <div className="error-message">
-                        <div className="flex items-center text-red-600 bg-red-50 p-3 rounded-md">
+                        <div className="flex items-center text-red-600 bg-red-50 p-3 rounded-md mx-auto w-fit">
                             <AlertTriangle className="alert-style" size={24} />
                             <span className="error-type">{props.error}</span>
                         </div>
