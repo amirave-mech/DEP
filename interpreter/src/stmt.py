@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+from enum import Enum
 from dataclasses import dataclass
+from types import BuiltinMethodType
 
 from interpreter.src.expr import Expr
 
@@ -34,7 +36,7 @@ class Block:
 @dataclass
 class FuncBody:
     params: list[str]
-    body: Block
+    body: Block | BuiltinFunctions
 
 @dataclass
 class FuncDef:
@@ -55,3 +57,9 @@ class If:
 class While:
     condition: Expr
     body: Stmt
+
+class BuiltinFunctions(Enum):
+    MOD = 1
+    LOG = 2
+    FLOOR = 3
+    CEIL = 4

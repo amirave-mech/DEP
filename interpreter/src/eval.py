@@ -1,3 +1,4 @@
+import math
 from typing import Callable
 import interpreter.src.expr as expr
 from interpreter.src.exceptions import ReturnException
@@ -20,7 +21,11 @@ class Eval:
     def __init__(self):
         self._environment = Environment()
         self._event_listeners: list[Callable[[Event], None]] = []
-        
+        self._environment.assign("mod", stmt.FuncBody(["x", "y"], stmt.BuiltinFunctions.MOD))
+        self._environment.assign("log", stmt.FuncBody(["base", "x"], stmt.BuiltinFunctions.LOG))
+        self._environment.assign("floor", stmt.FuncBody(["x"], stmt.BuiltinFunctions.FLOOR))
+        self._environment.assign("ceil", stmt.FuncBody(["x"], stmt.BuiltinFunctions.CEIL))
+
     def subscribe(self, listener: Callable[[Event], None]):
         self._event_listeners.append(listener)
         
@@ -100,6 +105,8 @@ class Eval:
         self._environment = curr_env
 
     def __visit_func_def(self, statement: stmt.FuncDef):
+        if self._environment.get_root_env().get(statement.func_name) is not None:
+            raise InterpreterException(f"Error: redefinition of previously defined function {statement.func_name}")
         self._environment.assign_to_root(statement.func_name, statement.func)
 
     def __visit_func_call(self, statement: expr.FuncCall):
@@ -111,6 +118,17 @@ class Eval:
         if len(func.params) is not len(statement.params):
             raise InterpreterException("""Error: mismatched number of parameters and arguments given!
              For support please incessantly call 053-337-1749, thank you.""")
+        if type(func.body) == stmt.BuiltinFunctions:
+            match func.body:
+                case stmt.BuiltinFunctions.MOD:
+                    return self.expression(statement.params[0]) % self.expression(statement.params[1])
+                case stmt.BuiltinFunctions.LOG:
+                    return math.log(self.expression(statement.params[1]), self.expression(statement.params[0]))
+                case stmt.BuiltinFunctions.FLOOR:
+                    return float(math.floor(self.expression(statement.params[0])))
+                case stmt.BuiltinFunctions.CEIL:
+                    return float(math.ceil(self.expression(statement.params[0])))
+
         func_env = Environment(self._environment.get_root_env())
         for p_name, p_val in zip(func.params, statement.params):
             func_env.assign(p_name, self.expression(p_val))
