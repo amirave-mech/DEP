@@ -1,5 +1,6 @@
 import interpreter.src.expr as expr
 from interpreter.src.interpreter_handler import Interpreter
+import os
 
 from typing import Final
 
@@ -37,21 +38,6 @@ print(ten_fact)
 print_arr(b, 4)
 """
 
-MergeSort: Final = """
-function insertion_sort(A, n)
-    i <- 1
-    while (i <= n)
-        key <- A[i]
-        j <- i-1
-        while (j >= 1 and A[j] > key)
-            A[j+1] <- A[j]
-            j <- j-1
-        A[j+1] <- key
-        i <- i+1
-        
-function binary_search(A, n, key
-"""
-
 # scanner = Scanner(SRC)
 # tokens = scanner.scan_tokens()
 # [print(tok) for tok in tokens]
@@ -63,7 +49,11 @@ function binary_search(A, n, key
 # evaluator = Eval()
 # evaluator.evaluate(stmt_ast_opt)
 
+source: str
+src_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "merge_search_test.txt"))
+with open(src_path, "r") as file:
+    source = file.read()
 
 journal_settings = JournalSettings(None, 100, 10)
 interpreter = Interpreter(journal_settings, False)
-print(interpreter.feedBlock(SRC).serialize())
+print(interpreter.feedBlock(source).serialize())

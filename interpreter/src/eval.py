@@ -282,11 +282,11 @@ class Eval:
                 else:
                     raise InterpreterException(self.__format_invalid_literal(TokenType.PLUS))
             case TokenType.GREATER:
-                if not isinstance(left, float) or isinstance(right, float):
+                if not (isinstance(left, float) or isinstance(right, float)):
                     raise InterpreterException(self.__format_invalid_literal(TokenType.GREATER))
                 return float(left) > float(right)
             case TokenType.GREATER_EQUAL:
-                if not isinstance(left, float) or isinstance(right, float):
+                if not (isinstance(left, float) or isinstance(right, float)):
                     raise InterpreterException(
                         self.__format_invalid_literal(TokenType.GREATER_EQUAL)
                     )
