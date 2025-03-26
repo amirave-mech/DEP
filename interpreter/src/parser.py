@@ -3,7 +3,7 @@ from interpreter.src.expr import Expr
 from interpreter.src.Token import Token
 from interpreter.src.interpreter_exception import InterpreterException
 from interpreter.src.token_type import TokenType
-from interpreter.src.stmt import Stmt
+from interpreter.src.stmt import Stmt, FuncDef, FuncBody
 import interpreter.src.stmt as stmt
 
 # TODO:
@@ -12,10 +12,14 @@ import interpreter.src.stmt as stmt
 
 
 class Parser:
+    _tokens: list[Token]
+    _pos: int = 0
+    _is_in_func_def: bool = False
+
     def __init__(self, tokens: list[Token]) -> None:
         self._tokens = tokens
         self._pos: int = 0
-        
+
     def parse(self) -> list[Stmt] | None:
         statements: list[Stmt] = []
 
@@ -66,18 +70,19 @@ class Parser:
                 return self.__print_statement()
             case TokenType.IDENTIFIER:
                 if not self.__is_eof():
-                    if self.__peek(1).tokenType == TokenType.LEFT_ARROW:
-                        return self.__assignment_statement()
-                    if self.__peek(1).tokenType == TokenType.LEFT_BRACKET and not self.__is_eof(4):
-                        if self.__peek(4).tokenType == TokenType.LEFT_ARROW:
-                            return self.__array_assignment_statement()
-                
+                    match self.__peek(1).tokenType:
+                        case TokenType.LEFT_ARROW:
+                            return self.__assignment_statement()
+            case TokenType.FUNC_DECL:
+                return self.__func_def()
             case TokenType.START_SCOPE:
                 return self.__block_statement()
             case TokenType.IF:
                 return self.__if_statement()
             case TokenType.WHILE:
                 return self.__while_statement()
+            case TokenType.RETURN:
+                return self.__visit_return_statement()
         return self.__expression_statement()
 
     def __while_statement(self) -> Stmt:
@@ -101,14 +106,14 @@ class Parser:
         self.__advance()
         if not self.__match_tok_type([TokenType.LEFT_PAREN]):
             raise InterpreterException("Expected '(' after 'if'")
-        
+
         self.__advance()
-        
+
         condition_expr = self.__expression()
 
         if not self.__match_tok_type([TokenType.RIGHT_PAREN]):
             raise InterpreterException("Expected ')' after if statement condition")
-        
+
         self.__advance()
 
         # ensuring new line
@@ -131,10 +136,10 @@ class Parser:
         self.__advance()
         statements: list[Stmt] = []
 
-        while(self.__peek().tokenType != TokenType.END_SCOPE and not self.__is_eof()):
+        while self.__peek().tokenType != TokenType.END_SCOPE and not self.__is_eof():
             statements.append(self.__statement())
         
-        if(self.__match_tok_type([TokenType.END_SCOPE])):
+        if self.__match_tok_type([TokenType.END_SCOPE]):
             self.__advance()
             return stmt.Block(statements)
 
@@ -176,6 +181,70 @@ class Parser:
 
         return stmt.ArrayAssignment(identifier, index, value)
 
+
+    def __func_call(self, func_name) -> Expr:
+        params = []
+        self.__advance()
+        while not(self.__is_eof()) and not(self.__is_eol()) and self.__peek().tokenType != TokenType.RIGHT_PAREN:
+            params.append(self.__expression())
+            if self.__peek().tokenType == TokenType.RIGHT_PAREN:
+                break
+            elif self.__peek().tokenType == TokenType.COMMA:
+                self.__advance()
+            else:
+                raise Exception("Expected ',' between parameter names")
+
+        if self.__peek().tokenType != TokenType.RIGHT_PAREN:
+            raise Exception("Expected ')' after function call")
+        self.__advance()
+        return expr.FuncCall(func_name, params)
+
+    def __func_def(self) -> Stmt:
+        self.__advance()
+        func_name = self.__peek().lexeme
+        self.__advance()  # skip function name
+
+        if self.__peek().tokenType != TokenType.LEFT_PAREN:
+            raise Exception("Expected '(' after function name")
+        self.__advance()  # skip '('
+
+        params = []
+        while not self.__is_eof() and self.__peek().tokenType != TokenType.RIGHT_PAREN:
+            if self.__peek().tokenType != TokenType.IDENTIFIER:
+                raise Exception("Expected parameter name")
+            params.append(self.__peek().lexeme)
+            self.__advance()
+
+            if self.__peek().tokenType == TokenType.COMMA:
+                self.__advance()
+            elif self.__peek().tokenType != TokenType.RIGHT_PAREN:
+                raise Exception("Expected ',' or ')' after parameter")
+
+        if self.__peek().tokenType != TokenType.RIGHT_PAREN:
+            raise Exception("Expected ')' after parameters")
+        self.__advance()  # skip ')'
+
+        if not self.__is_eol():
+            raise Exception("Expected newline after function declaration")
+        self.__advance_line()  # skip newline
+
+        if self.__peek().tokenType != TokenType.START_SCOPE:
+            raise Exception("Expected a code block after function declaration")
+        self._is_in_func_def = True
+        block = self.__block_statement()
+        self._is_in_func_def = False
+
+        return FuncDef(func_name, FuncBody(params, block))
+
+    def __visit_return_statement(self):
+        if not self._is_in_func_def:
+            raise Exception("Error: cannot Return outside of function body")
+        self.__advance()
+        ret = stmt.Return(expr.Void())
+        if not(self.__peek().tokenType == TokenType.EOL):
+            ret = stmt.Return(self.__expression())
+        self.__advance()
+        return ret
 
     def __expression_statement(self) -> Stmt:
         val = self.__expression()
@@ -282,20 +351,30 @@ class Parser:
         return self.__primary()
 
     def __primary(self) -> Expr:
-        if (self.__peek().tokenType == TokenType.IDENTIFIER) and (not self.__is_eof()) and (self.__peek(1).tokenType == TokenType.LEFT_BRACKET):
-            name = self.__peek().lexeme
+        if self.__peek().tokenType == TokenType.IDENTIFIER:
+            literal = self.__peek()
+            if not self.__is_eof():
+                name =literal.lexeme
+                if self.__peek(1).tokenType == TokenType.LEFT_BRACKET:
+                    self.__advance()
+                    self.__advance()
 
-            self.__advance()
-            self.__advance()
+                    index = self.__expression()
 
-            index = self.__expression()
+                    if not self.__match_tok_type([TokenType.RIGHT_BRACKET]):
+                        raise InterpreterException("{}: expected ']' after array indexing".format(self.__display_peek_info()))
 
-            if not self.__match_tok_type([TokenType.RIGHT_BRACKET]):
-                raise InterpreterException("{}: expected ']' after array indexing".format(self.__display_peek_info()))
+                    self.__advance()
 
-            self.__advance()
+                    return expr.ArrayAccess(name, index)
+                elif self.__peek(1).tokenType == TokenType.LEFT_PAREN:
+                    self.__advance()
+                    return self.__func_call(name)
 
-            return expr.ArrayAccess(name, index)
+            else:
+                if not self.__is_eof():
+                    self.__advance()
+                return expr.Literal(literal)
 
         if self.__match_tok_type(
             [
@@ -304,7 +383,6 @@ class Parser:
                 TokenType.TRUE,
                 TokenType.FALSE,
                 TokenType.NIL,
-                TokenType.IDENTIFIER
             ]
         ):
             literal = self.__peek()
@@ -327,7 +405,7 @@ class Parser:
             self.__advance()
 
             elts: list[Expr] = [self.__expression()]
-            while(self.__match_tok_type([TokenType.COMMA])):
+            while self.__match_tok_type([TokenType.COMMA]):
                 self.__advance()
 
                 elt = self.__expression()
