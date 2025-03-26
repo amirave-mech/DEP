@@ -100,6 +100,8 @@ class Eval:
         self._environment = curr_env
 
     def __visit_func_def(self, statement: stmt.FuncDef):
+        if self._environment.get_root_env().get(statement.func_name) is not None:
+            raise InterpreterException(f"Error: redefinition of previously defined function {statement.func_name}")
         self._environment.assign_to_root(statement.func_name, statement.func)
 
     def __visit_func_call(self, statement: expr.FuncCall):
