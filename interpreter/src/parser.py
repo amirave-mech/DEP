@@ -150,7 +150,7 @@ class Parser:
             self.__advance()
             return stmt.Block(statements)
 
-        raise InterpreterException("expected end of block but reached: ", self.__peek())
+        raise InterpreterException(f"expected end of block but reached: {self.__peek()}")
 
     def __print_statement(self) -> Stmt:
         self.__advance()

@@ -268,7 +268,7 @@ class Eval:
                 if not (isinstance(left, float) and isinstance(right, float)):
                     raise InterpreterException(self.__format_invalid_literal(TokenType.SLASH))
                 if float(right) == 0:
-                    raise InterpreterException(ZeroDivisionError)
+                    raise InterpreterException("Division by zero")
                 return float(left) / float(right)
             case TokenType.STAR:
                 if not (isinstance(left, float) and isinstance(right, float)):
