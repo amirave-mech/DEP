@@ -16,7 +16,7 @@ function yuvi_cruvi(arr, len)
     sum <- 0
     while (i <= len)
         sum <- sum + arr[i]
-        arr[i]  <- -1
+        arr[i] <- -1
         i <- i+1
     return sum
 function factorial(n)
@@ -35,6 +35,21 @@ print(sum)
 ten_fact <- factorial(10)
 print(ten_fact)
 print_arr(b, 4)
+"""
+
+MergeSort: Final = """
+function insertion_sort(A, n)
+    i <- 1
+    while (i <= n)
+        key <- A[i]
+        j <- i-1
+        while (j >= 1 and A[j] > key)
+            A[j+1] <- A[j]
+            j <- j-1
+        A[j+1] <- key
+        i <- i+1
+        
+function binary_search(A, n, key
 """
 
 # scanner = Scanner(SRC)

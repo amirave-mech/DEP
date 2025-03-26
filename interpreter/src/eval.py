@@ -85,8 +85,9 @@ class Eval:
             raise InterpreterException("Invalid array indexing, exceeding array size")
 
         # TEMPORARY EVENT EMITTER
-        self._emit_event(ArrayModificationEvent(statement.name, array, new_value))
+        temp = array.copy()
         array[index - 1] = new_value
+        self._emit_event(ArrayModificationEvent(statement.name, array, temp))
 
     def __visit_block_stmt(self, statement: stmt.Block, new_env=None):
         curr_env = self._environment
