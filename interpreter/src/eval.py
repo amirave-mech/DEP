@@ -83,6 +83,8 @@ class Eval:
         new_value = self.expression(statement.value)
 
         array = self._environment.get(statement.name)
+        if array is None:
+            raise InterpreterException("variable '{}' is not defined".format(statement.name))
         # TODO: Notify journal of array modification
         if not isinstance(array, list):
             raise InterpreterException("Trying to access a non-array variable")
@@ -112,6 +114,9 @@ class Eval:
     def __visit_func_call(self, statement: expr.FuncCall):
         func: stmt.FuncBody
         func = self._environment.get(statement.func_name)
+        if func is None:
+            raise InterpreterException("variable '{}' is not defined".format(statement.func_name))
+
         if type(func) is not stmt.FuncBody:
             raise InterpreterException("""An internal error has occurred, a function was used that was indeed not defined as a
              function! For support please incessantly call 053-337-1749, thank you.""")
@@ -193,6 +198,9 @@ class Eval:
     # Expression Visitors
     def __visit_literal(self, expr: expr.Literal) -> Literal:
         if expr.value.tokenType == TokenType.IDENTIFIER:
+            variable = self._environment.get(expr.value.lexeme)
+            if variable is None:
+                raise InterpreterException("variable '{}' is not defined".format(expr.value.lexeme))
             return self._environment.get(expr.value.lexeme)
 
         if expr.value.tokenType == TokenType.TRUE:
@@ -221,6 +229,8 @@ class Eval:
 
     def __visit_array_access(self, expr: expr.ArrayAccess) -> Literal:
         array = self._environment.get(expr.name)
+        if array is None:
+            raise InterpreterException("variable '{}' is not defined".format(expr.name))
         # TODO: Notify journal of array modification
         if not isinstance(array, list):
             raise InterpreterException("Trying to access a non-array variable")
@@ -232,7 +242,10 @@ class Eval:
         return array[index - 1]
 
     def __visit_length(self, expr: expr.Length) -> Literal:
-        return len(self._environment.get(expr.name))
+        variable = self._environment.get(expr.name)
+        if variable is None:
+            raise InterpreterException("variable '{}' is not defined".format(expr.name))
+        return len(variable)
 
     def __visit_grouping(self, expr: expr.Grouping) -> Literal:
         return self.expression(expr.expression)
