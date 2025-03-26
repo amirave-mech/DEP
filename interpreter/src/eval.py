@@ -32,12 +32,8 @@ class Eval:
             listener(event)
 
     def evaluate(self, statements: list[Stmt]):
-        try:
-            for statement in statements:
-                self.__execute_statement(statement)
-        except:
-            # TODO: Add runtime evaluation errors reporting
-            pass
+        for statement in statements:
+            self.__execute_statement(statement)
 
     def __execute_statement(self, statement: Stmt) -> None:
         match statement:
@@ -107,10 +103,10 @@ class Eval:
         func: stmt.FuncBody
         func = self._environment.get(statement.func_name)
         if type(func) is not stmt.FuncBody:
-            raise Exception("""An internal error has occurred, a function was used that was indeed not defined as a
+            raise InterpreterException("""An internal error has occurred, a function was used that was indeed not defined as a
              function! For support please incessantly call 053-337-1749, thank you.""")
         if len(func.params) is not len(statement.params):
-            raise Exception("""Error: mismatched number of parameters and arguments given!
+            raise InterpreterException("""Error: mismatched number of parameters and arguments given!
              For support please incessantly call 053-337-1749, thank you.""")
         func_env = Environment(self._environment.get_root_env())
         for p_name, p_val in zip(func.params, statement.params):

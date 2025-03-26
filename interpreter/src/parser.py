@@ -370,11 +370,10 @@ class Parser:
                 elif self.__peek(1).tokenType == TokenType.LEFT_PAREN:
                     self.__advance()
                     return self.__func_call(name)
-
-            else:
-                if not self.__is_eof():
-                    self.__advance()
-                return expr.Literal(literal)
+                else:
+                    if not self.__is_eof():
+                        self.__advance()
+                    return expr.Literal(literal)
 
         if self.__match_tok_type(
             [
