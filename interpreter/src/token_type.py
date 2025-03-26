@@ -45,6 +45,7 @@ class TokenType(Enum):
     IF = auto()
     NIL = auto()
     PRINT = auto()
+    LENGTH = auto()
     RETURN = auto()
     WHILE = auto()
     EOF = auto()

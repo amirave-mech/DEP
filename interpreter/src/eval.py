@@ -39,6 +39,8 @@ class Eval:
         match statement:
             case stmt.Print():
                 self.__visit_print_stmt(statement)
+            # case stmt.Length():
+            #     self.__visit_length_stmt(statement)
             case stmt.Expression():
                 self.__visit_expr_stmt(statement)
             case stmt.Assignment():
@@ -157,6 +159,8 @@ class Eval:
                 return self.__visit_array_literal(ast)
             case expr.ArrayAccess():
                 return self.__visit_array_access(ast)
+            case expr.Length():
+                return self.__visit_length(ast)
             case expr.Grouping():
                 return self.__visit_grouping(ast)
             case expr.Unary():
@@ -208,6 +212,9 @@ class Eval:
             raise InterpreterException("Invalid array indexing, exceeding array size")
 
         return array[index - 1]
+
+    def __visit_length(self, expr: expr.Length) -> Literal:
+        return len(self._environment.get(expr.name))
 
     def __visit_grouping(self, expr: expr.Grouping) -> Literal:
         return self.expression(expr.expression)

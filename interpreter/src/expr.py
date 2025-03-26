@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from interpreter.src.Token import Token
 from interpreter.src.token_type import TokenType
 
-type Expr = Grouping | Binary | Logical | Unary | Literal | ArrayLiteral | ArrayAccess | FuncCall | Void
+type Expr = Grouping | Binary | Logical | Unary | Literal | ArrayLiteral | ArrayAccess | FuncCall | Void | Length
 
 
 @dataclass
@@ -48,6 +48,10 @@ class ArrayLiteral:
 class ArrayAccess:
     name: str
     idx: Expr
+
+@dataclass
+class Length:
+    name: str
 
 @dataclass
 class FuncCall:

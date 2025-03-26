@@ -10,6 +10,7 @@ reserved_keywords = {
     "for": TokenType.FOR,
     "while": TokenType.WHILE,
     "print": TokenType.PRINT,
+    "length": TokenType.LENGTH,
     "return": TokenType.RETURN,
     "true": TokenType.TRUE,
     "false": TokenType.FALSE,

@@ -68,6 +68,8 @@ class Parser:
         match self.__peek().tokenType:
             case TokenType.PRINT:
                 return self.__print_statement()
+            case TokenType.LENGTH:
+                return self.__length_statement()
             case TokenType.IDENTIFIER:
                 if not self.__is_eof():
                     if self.__peek(1).tokenType == TokenType.LEFT_ARROW:
@@ -353,6 +355,20 @@ class Parser:
         return self.__primary()
 
     def __primary(self) -> Expr:
+        if self.__peek().tokenType == TokenType.LENGTH and not self.__is_eof():
+            self.__advance()
+            val = self.__expression()
+
+            while isinstance(val, expr.Grouping):
+                val = val.expression
+
+            if not (isinstance(val, expr.Literal) and val.value.tokenType == TokenType.IDENTIFIER):
+                raise InterpreterException("Cannot get length of non-identifier objects")
+
+            name = val.value.lexeme
+
+            return expr.Length(name)
+
         if self.__peek().tokenType == TokenType.IDENTIFIER:
             literal = self.__peek()
             if not self.__is_eof():
