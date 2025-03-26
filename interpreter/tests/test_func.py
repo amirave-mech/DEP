@@ -56,4 +56,9 @@ with open(src_path, "r") as file:
 
 journal_settings = JournalSettings(None, 100, 10)
 interpreter = Interpreter(journal_settings, False)
+# print(interpreter.feedBlock(source).serialize())
+
+src_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "ilay_test.txt"))
+with open(src_path, "r") as file:
+    source = file.read()
 print(interpreter.feedBlock(source).serialize())
