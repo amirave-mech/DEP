@@ -74,8 +74,11 @@ class Parser:
                 if not self.__is_eof():
                     if self.__peek(1).tokenType == TokenType.LEFT_ARROW:
                         return self.__assignment_statement()
-                    if self.__peek(1).tokenType == TokenType.LEFT_BRACKET and not self.__is_eof(4):
-                        if self.__peek(4).tokenType == TokenType.LEFT_ARROW:
+                    if self.__peek(1).tokenType == TokenType.LEFT_BRACKET:
+                        pos = 1
+                        while(not self.__is_eof() and self.__peek(pos).tokenType != TokenType.LEFT_ARROW):
+                            pos += 1
+                        if not self.__is_eof(pos):
                             return self.__array_assignment_statement()
             case TokenType.FUNC_DECL:
                 return self.__func_def()
@@ -178,7 +181,6 @@ class Parser:
         self.__advance()
         self.__advance()
 
-        print(self.__peek())
         value = self.__expression()
 
         self.__advance_line()
