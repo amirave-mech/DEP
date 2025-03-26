@@ -6,12 +6,11 @@ from interpreter.src.expr import Expr
 
 from interpreter.src.Token import Token
 
-type Stmt = Expression | Print | Assignment | Block | While
+type Stmt = Expression | Print | Assignment | Block | FuncDef | While | If | Return
 
 @dataclass
 class Expression:
     expression: Expr
-
 
 @dataclass
 class Print:
@@ -31,6 +30,20 @@ class ArrayAssignment:
 @dataclass
 class Block:
     statements: list[Stmt]
+
+@dataclass
+class FuncBody:
+    params: list[str]
+    body: Block
+
+@dataclass
+class FuncDef:
+    func_name: str
+    func: FuncBody
+
+@dataclass
+class Return:
+    ret_val: Expr
 
 @dataclass
 class If:
