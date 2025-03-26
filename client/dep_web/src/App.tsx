@@ -8,7 +8,7 @@ declare var __API_DOMAIN__: string;
 var domain: string = __API_DOMAIN__
 
 function App() {
-  const [codeText, setCodeText] = React.useState("print('hello world!')");
+  const [codeText, setCodeText] = React.useState('print("hello world!")');
   const [output, setOutput] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState('');
@@ -69,7 +69,7 @@ function App() {
 function Header() {
   return (
     <div className='header'>
-      <h1 className='title'>Dipsy</h1>
+      <h1 className='title'>Pcode</h1>
     </div>
   )
 }
