@@ -1,5 +1,6 @@
 import './OutputModule.css';
-import JSONPresenter from './JSONPresenter';
+// import JSONPresenter from './JSONPresenter';
+import JournalVisualizer from './JournalVisualizer';
 import { Play, Bug, Loader, AlertTriangle } from 'lucide-react';
 
 export function OutputModule(props: {
@@ -11,21 +12,21 @@ export function OutputModule(props: {
     serverMessage?: string
 }) {
     return (
-        <div className="output-module">
+        <div className="border output-module">
             <div className="output-buttons">
                 <button
                     onClick={props.runCode}
                     className="run-button"
                     disabled={props.isLoading}
                 >
-                    <><Play size={16} className="mr-1" /> Run 🐫🐫🐫🐫</>
+                    <><Play size={16} className="mr-1" /> Run 🐫🐫🐫🐫 (F5)</>
                 </button>
                 <button
                     onClick={props.runDebug}
                     className="debug-button"
                     disabled={props.isLoading}
                 >
-                    <Bug size={16} className="mr-1" /> Debug
+                    <Bug size={16} className="mr-1" /> Debug (Shift+F5)
                 </button>
             </div>
             <div className="output-content">
@@ -36,7 +37,7 @@ export function OutputModule(props: {
                 )}
                 {props.error && (
                     <div className="error-message">
-                        <div className="flex items-center text-red-600 bg-red-50 p-3 rounded-md">
+                        <div className="flex items-center text-red-600 bg-red-50 p-3 rounded-md mx-auto w-fit">
                             <AlertTriangle className="alert-style" size={24} />
                             <span className="error-type">{props.error}</span>
                         </div>
@@ -48,7 +49,8 @@ export function OutputModule(props: {
                     </div>
                 )}
                 {!props.isLoading && !props.error && props.outputText && (
-                    <JSONPresenter jsonString={props.outputText} />
+                    // <JSONPresenter jsonString={props.outputText} />
+                    <JournalVisualizer journal={JSON.parse(props.outputText)}/>
                 )}
             </div>
         </div>

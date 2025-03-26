@@ -1,22 +1,41 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import './App.css';
 import { CodeModule } from './CodeModule';
 import { OutputModule } from './OutputModule';
+import Header from './Header';
+import TutorialModal from './TutorialModal';
 
 declare var __API_DOMAIN__: string;
 
 var domain: string = __API_DOMAIN__
 
 function App() {
-  const [codeText, setCodeText] = React.useState("print('hello world!')");
+  const [codeText, setCodeText] = React.useState('print("hello world!")');
   const [output, setOutput] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState('');
   const [serverMessage, setServerMessage] = React.useState('');
 
+  const [showTutorial, setShowTutorial] = React.useState(false);
+
   const onCodeTextChange = React.useCallback((val: React.SetStateAction<string>) => {
     setCodeText(val);
   }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "F5") {
+        event.preventDefault();
+        event.shiftKey? runCode(true) : runCode(false);
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    }
+  })
 
   const runCode = async (isDebug: boolean) => {
     if (!codeText) return;
@@ -26,7 +45,7 @@ function App() {
     setOutput('');
     setServerMessage('');
 
-    const response = await fetchData(codeText, isDebug);
+    const response = await fetchData(codeText + '\n', isDebug);
     if (response.status == "error") {
       setError('Error executing code');
       setServerMessage(response.message || 'Unknown error occurred');
@@ -40,9 +59,14 @@ function App() {
     setIsLoading(false);
   };
 
+  const showTutorialModal = () => {
+    console.log(showTutorial);
+    setShowTutorial(true);
+  }
+
   return (
     <>
-      <Header></Header>
+      <Header onOpenTutorial={showTutorialModal}></Header>
       <div className="main-content">
         <div className="left-side">
           <CodeModule
@@ -61,16 +85,10 @@ function App() {
             serverMessage={serverMessage}
           />
         </div>
+
+        <TutorialModal isOpen={showTutorial} setIsOpen={setShowTutorial} />
       </div>
     </>
-  )
-}
-
-function Header() {
-  return (
-    <div className='header'>
-      <h1 className='title'>Dipsy</h1>
-    </div>
   )
 }
 

@@ -1,10 +1,7 @@
 .output-module {
     display: flex;
     flex-direction: column;
-    height: 100%;
     background-color: var(--bg-tonal-a0);
-    border-radius: 4px;
-    border: 1px solid var(--bg-color-a50);
   }
   
   .output-buttons {

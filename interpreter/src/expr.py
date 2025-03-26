@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from interpreter.src.Token import Token
 from interpreter.src.token_type import TokenType
 
-type Expr = Grouping | Binary | Logical | Unary | Literal | ArrayLiteral | ArrayAccess
+type Expr = Grouping | Binary | Logical | Unary | Literal | ArrayLiteral | ArrayAccess | FuncCall | Void | Length
 
 
 @dataclass
@@ -49,6 +49,18 @@ class ArrayAccess:
     name: str
     idx: Expr
 
+@dataclass
+class Length:
+    name: str
+
+@dataclass
+class FuncCall:
+    func_name: str
+    params: list[any]
+
+@dataclass
+class Void:
+    pass
 
 def display(expr: Expr) -> str:
     match expr:
