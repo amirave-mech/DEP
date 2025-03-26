@@ -245,7 +245,7 @@ class Eval:
         variable = self._environment.get(expr.name)
         if variable is None:
             raise InterpreterException("variable '{}' is not defined".format(expr.name))
-        return len(variable)
+        return float(len(variable))
 
     def __visit_grouping(self, expr: expr.Grouping) -> Literal:
         return self.expression(expr.expression)
