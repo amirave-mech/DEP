@@ -16,6 +16,7 @@ function yuvi_cruvi(arr, len)
     sum <- 0
     while (i <= len)
         sum <- sum + arr[i]
+        arr[i] = -1
         i <- i+1
     return sum
 function factorial(n)
@@ -23,11 +24,17 @@ function factorial(n)
         return 1
     else
         return n*factorial(n-1)
+function print_arr(a, len)
+    i <- 1
+    while (i <= len)
+        print(a[i])
+        i <- i+1
 b <- [0,1,2,3]
 sum <- yuvi_cruvi(b, 4)
 print(sum)
 ten_fact <- factorial(10)
 print(ten_fact)
+print_arr(b, 4)
 """
 
 # scanner = Scanner(SRC)
