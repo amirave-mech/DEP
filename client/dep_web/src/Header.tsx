@@ -5,7 +5,7 @@ import {
 function Header({onOpenTutorial}: any) {
     return (
         <div className='header'>
-            <img src='public/logo.png' />
+            <img src='/logo.png' />
             <div>
                 <button className='flex flex-column gap-1 items-center' onClick={onOpenTutorial}>
                     <p>Tutorial</p>
