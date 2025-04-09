@@ -60,22 +60,22 @@ while (i < 5)
 For loops are WIP 🦐
 
 ### Functions:
-Functions are declared with just their name, and their paremeters.
+Functions are declared as following:
 \`\`\`
-greet(name)
+function greet(name)
     print("Hello,", name)
 \`\`\`
 
 ## Example Code \n\n
 Try out the following code and figure out what it does:
 \`\`\`
-what(n)
-    if n = 0
-        return True
+function what(n)
+    if (n = 0)
+        return 1
     else
         return n * what(n - 1)
 
-what(10)
+print(what(5))
 \`\`\`
   `;
 
