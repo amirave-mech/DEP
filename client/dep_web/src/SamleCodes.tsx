@@ -78,8 +78,12 @@ print(Arr)
         return binary_search_internal(A, mid+1, r, x)
     return binary_search_internal(A, l, mid-1, x)
 
-function binary_search(A, n, x)
-    return binary_search_internal(A, 1, n, x)
+function binary_search(A, x)
+    return binary_search_internal(A, 1, length(A), x)
+
+arr <- [0, 8, 13, 19, 25, 42, 83]
+print(binary_search(arr, 83))
+print(binary_search(arr, 12))
             `.trim(),
           },    
       ];
