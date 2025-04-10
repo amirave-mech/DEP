@@ -1,0 +1,30 @@
+function exchange(A, i, j)
+    temp <- A[i]
+    A[i] <- A[j]
+    A[j] <- temp
+
+function Partition(A, p, r)
+    x <- A[r]
+    i <- p-1
+    j <- p
+    while (j < r)
+        if (A[j] <= x)
+            i <- i+1
+            exchange(A, i, j)
+        j <- j+1
+    i <- i+1
+    exchange(A, i, r)
+    return i
+
+function QuickSortInternal(A, p, r)
+    if (p<r)
+        q <- Partition(A, p, r)
+        QuickSortInternal(A, p, q-1)
+        QuickSortInternal(A, q+1, r)
+
+function QuickSort(A)
+    QuickSortInternal(A, 1, length(A))
+
+Arr <- [0, 50, 86, 7, -24]
+QuickSort(Arr)
+print(Arr)

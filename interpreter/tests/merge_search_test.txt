@@ -12,11 +12,11 @@ function insertion_sort(A, n)
         i <- i+1
 
 function binary_search_internal(A, l, r, x)
+    if (l>r)
+        return -1
     mid <- floor((l+r)/2)
     if (A[mid] = x)
         return mid
-    if (l>=r)
-        return -1
     if (A[mid] < x)
         return binary_search_internal(A, mid+1, r, x)
     return binary_search_internal(A, l, mid-1, x)
