@@ -66,7 +66,7 @@ function App() {
 
   return (
     <>
-      <Header onOpenTutorial={showTutorialModal}></Header>
+      <Header onOpenTutorial={showTutorialModal} onSampleSelect={(code) => setCodeText(code)}></Header>
       <div className="main-content">
         <div className="left-side">
           <CodeModule
