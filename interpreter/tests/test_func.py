@@ -50,7 +50,7 @@ print_arr(b, 4)
 # evaluator.evaluate(stmt_ast_opt)
 
 source: str
-src_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "merge_search_test.txt"))
+src_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "quicksort.txt"))
 with open(src_path, "r") as file:
     source = file.read()
 
